@@ -84,6 +84,15 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 .switch input:checked + .slider:before{transform:translateX(26px)}
 .overallBox{margin-top:12px;padding:12px;border-radius:14px;background:#f5f4f1;text-align:center}
 .overallBox b{font-size:28px;display:block}
+
+/* v7: prevent accidental double-tap zoom while rapid scoring */
+button, .hitbtn, .missbtn, .actions, .bottom {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 </style>
 
 
