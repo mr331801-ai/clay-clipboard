@@ -93,11 +93,40 @@ button, .hitbtn, .missbtn, .actions, .bottom {
   -webkit-tap-highlight-color: transparent;
 }
 
+
+/* v8: simple in-app update prompt */
+#updateBanner{
+  position:fixed;left:12px;right:12px;top:12px;z-index:1000;
+  max-width:520px;margin:auto;background:#171717;color:#fff;
+  border-radius:16px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,.28);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+#updateBanner.hidden{display:none!important}
+#updateBanner button{
+  background:#fff;color:#171717;border:0;border-radius:12px;padding:9px 12px;font-weight:800;
+}
+
+
+/* v9: screen wake lock status */
+#wakeStatus{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+}
+#wakeStatus.on{color:var(--hit);font-weight:700}
+
 </style>
 
 
 </head>
 <body>
+
+<div id="updateBanner" class="hidden">
+  <div><strong>Update available</strong><div style="font-size:12px;opacity:.8">Tap once to refresh Clay Clipboard.</div></div>
+  <button onclick="applyUpdate()">Update</button>
+</div>
+
 <div class="wrap">
   <div id="setup">
     <h1>Clay Clipboard</h1>
@@ -136,6 +165,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
       <div class="progress" id="targetLabel">Target 1 of 10</div>
       <div class="dots" id="dots"></div>
     </div>
+    <div id="wakeStatus">Screen awake while scoring</div>
 
     <div class="card">
       <div class="summary">
@@ -242,6 +272,7 @@ function restoreState(){
       document.getElementById('overallToggle').checked=!!saved.overallVisible;
       render();
       toggleOverall();
+      requestWakeLock();
     } else if(saved.mode==='finished'){
       document.getElementById('setup').classList.add('hidden');
       document.getElementById('scoring').classList.add('hidden');
@@ -411,6 +442,7 @@ function startRound(){
   document.getElementById('controls').classList.remove('hidden');
   render();
   saveState();
+  requestWakeLock();
 }
 function score(v){
   const arr=ensure(state.stand,state.shooter);
@@ -548,6 +580,7 @@ function scoreTheCard(){
 }
 
 function newRound(){
+  releaseWakeLock();
   clearSavedState();
   location.reload();
 }
@@ -594,6 +627,99 @@ function clearEditedShooter(){
 
 renderShooters();
 
+
+let wakeLock=null;
+
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try{
+    wakeLock=await navigator.wakeLock.request('screen');
+    const status=document.getElementById('wakeStatus');
+    if(status){
+      status.textContent='Screen will stay awake while scoring';
+      status.classList.add('on');
+    }
+    wakeLock.addEventListener('release', ()=>{
+      const s=document.getElementById('wakeStatus');
+      if(s){
+        s.textContent='Screen wake lock paused';
+        s.classList.remove('on');
+      }
+    });
+  }catch(e){}
+}
+
+async function releaseWakeLock(){
+  try{
+    if(wakeLock){
+      await wakeLock.release();
+      wakeLock=null;
+    }
+  }catch(e){}
+}
+
+function scoringIsActive(){
+  const scoring=document.getElementById('scoring');
+  return scoring && !scoring.classList.contains('hidden');
+}
+
+// iOS may release the wake lock when the app loses focus.
+// Re-request it when the app becomes visible again during a round.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && scoringIsActive()){
+    requestWakeLock();
+  }
+});
+
+
+let waitingWorker=null;
+
+function showUpdateBanner(worker){
+  waitingWorker=worker;
+  document.getElementById('updateBanner')?.classList.remove('hidden');
+}
+
+function applyUpdate(){
+  if(waitingWorker){
+    waitingWorker.postMessage({type:'SKIP_WAITING'});
+  } else {
+    location.reload();
+  }
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async ()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./service-worker.js');
+
+      if(reg.waiting) showUpdateBanner(reg.waiting);
+
+      reg.addEventListener('updatefound', ()=>{
+        const newWorker=reg.installing;
+        if(!newWorker) return;
+        newWorker.addEventListener('statechange', ()=>{
+          if(newWorker.state==='installed' && navigator.serviceWorker.controller){
+            showUpdateBanner(newWorker);
+          }
+        });
+      });
+
+      // Check for updates whenever the app is opened while online.
+      if(navigator.onLine) reg.update().catch(()=>{});
+
+      window.addEventListener('online', ()=>{
+        reg.update().catch(()=>{});
+      });
+
+      let refreshing=false;
+      navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+        if(refreshing) return;
+        refreshing=true;
+        location.reload();
+      });
+    }catch(e){}
+  });
+}
 </script>
 
 <div id="editModal" class="modalBack hidden" onclick="closeEdit(event)">
