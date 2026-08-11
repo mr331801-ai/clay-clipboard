@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f4f2ed">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Clay Clipboard</title>
+<style>
+:root{
+  --bg:#f4f2ed; --card:#fff; --ink:#171717; --muted:#6d6d6d;
+  --hit:#1f7a3f; --miss:#b53b32; --accent:#d87521; --line:#ddd8cf;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+.wrap{max-width:520px;margin:auto;padding:16px 16px 140px}
+.card{background:#fff;border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+h1{margin:4px 0 2px;font-size:28px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center}
+input,button{font:inherit}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white}
+button{border:0;border-radius:14px;padding:12px 14px;font-weight:800}
+button.secondary{background:#e9e7e1}
+button.primary{background:var(--accent);color:white}
+button.danger{background:#f4deda;color:#8c251d}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+.shooter-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-top:8px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hero{text-align:center;padding:24px 14px}
+.kicker{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.name{font-size:48px;font-weight:900;line-height:1.05;margin:12px 0}
+.progress{font-size:20px;color:var(--muted);font-weight:700}
+.dots{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+.dot{width:34px;height:34px;border-radius:9px;background:#eceae5;display:flex;align-items:center;justify-content:center;font-weight:900}
+.dot.hit{background:#e0f1e5;color:var(--hit);border:2px solid var(--hit)}
+.dot.miss{background:#f5dfdd;color:var(--miss);border:2px solid var(--miss)}
+.dot.current{outline:3px solid #222}
+.summary{display:flex;justify-content:space-between;gap:10px}
+.summary div{flex:1;background:#f5f4f1;border-radius:14px;padding:12px;text-align:center}
+.summary b{display:block;font-size:24px}
+.bottom{
+  position:fixed;left:0;right:0;bottom:0;background:rgba(244,242,237,.97);
+  border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));backdrop-filter:blur(10px)
+}
+.bottom .inner{max-width:520px;margin:auto}
+.bigbuttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bigbuttons button{height:78px;font-size:24px;border-radius:18px}
+.hitbtn{background:var(--hit);color:white}
+.missbtn{background:var(--miss);color:white}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.actions button{background:#e7e5df}
+.hidden{display:none!important}
+.scoreline{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #eee}
+.tiny{font-size:12px;color:var(--muted)}
+
+.modalBack{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;
+  padding:16px;z-index:50
+}
+.modal{
+  width:100%;max-width:520px;background:white;border-radius:22px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.25)
+}
+.modal h2{margin:0 0 4px;font-size:24px}
+.modal .subline{color:var(--muted);font-size:14px;margin-bottom:14px}
+.editgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.editTarget{
+  aspect-ratio:1;border-radius:14px;background:#efede8;border:2px solid transparent;
+  font-size:18px;font-weight:900
+}
+.editTarget.hit{background:#e0f1e5;border-color:var(--hit);color:var(--hit)}
+.editTarget.miss{background:#f5dfdd;border-color:var(--miss);color:var(--miss)}
+.modalBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+
+.toggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.switch{position:relative;display:inline-block;width:58px;height:32px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#cbc8c1;border-radius:999px;transition:.2s}
+.slider:before{content:"";position:absolute;height:26px;width:26px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.switch input:checked + .slider{background:var(--accent)}
+.switch input:checked + .slider:before{transform:translateX(26px)}
+.overallBox{margin-top:12px;padding:12px;border-radius:14px;background:#f5f4f1;text-align:center}
+.overallBox b{font-size:28px;display:block}
+</style>
+
+
+</head>
+<body>
+<div class="wrap">
+  <div id="setup">
+    <h1>Clay Clipboard</h1>
+    <div class="sub">One shooter at a time. Fixed order. Big HIT / MISS buttons.</div>
+
+    <div class="card">
+      <div class="setup-grid">
+        <div>
+          <label>Number of stands</label>
+          <input id="standCount" type="number" min="1" max="30" value="10">
+        </div>
+        <div>
+          <label>Targets per stand</label>
+          <input id="targetsPerStand" type="number" min="1" max="20" value="10">
+        </div>
+      </div>
+      <div class="tiny" style="margin-top:8px">You can change targets at individual stands later in a future version. For this test, every stand uses the same number.</div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <strong>Shooters</strong>
+        <button class="secondary" onclick="addShooter()">+ Add</button>
+      </div>
+      <div id="shooters"></div>
+      <div class="tiny" style="margin-top:8px">This order stays the same at every stand.</div>
+    </div>
+
+    <button class="primary" style="width:100%;padding:16px" onclick="startRound()">Start Test Round</button>
+  </div>
+
+  <div id="scoring" class="hidden">
+    <div class="card hero">
+      <div class="kicker" id="standLabel">Stand 1 of 10</div>
+      <div class="name" id="shooterName">Chris</div>
+      <div class="progress" id="targetLabel">Target 1 of 10</div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="card">
+      <div class="summary">
+        <div><span class="tiny">Current stand score</span><b id="standScore">0/10</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toggleRow">
+        <div>
+          <strong>Show Overall Score</strong>
+          <div class="tiny">Turn on only when a shooter wants to know where they stand.</div>
+        </div>
+        <label class="switch">
+          <input id="overallToggle" type="checkbox" onchange="toggleOverall()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="overallBox" class="overallBox hidden">
+        <span class="tiny">Current overall score</span>
+        <b id="overallScore">0/0</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Stand totals</strong>
+      <div id="standTotals"></div>
+    </div>
+  </div>
+
+  <div id="finished" class="hidden">
+    <h1>Round Complete</h1>
+    <div class="card">
+      <div class="sub" style="margin-bottom:0">Round complete. Final totals are still hidden.</div>
+    </div>
+    <button id="scoreCardBtn" class="primary" style="width:100%;padding:16px" onclick="scoreTheCard()">Score the Card</button>
+
+    <div id="finalCard" class="hidden">
+      <div class="card">
+        <strong>Final Scores</strong>
+        <div id="finalScores" style="margin-top:8px"></div>
+      </div>
+      <button class="primary" style="width:100%" onclick="newRound()">New Round</button>
+    </div>
+  </div>
+</div>
+
+<div id="controls" class="bottom hidden">
+  <div class="inner">
+    <div class="bigbuttons">
+      <button class="hitbtn" onclick="score(1)">HIT</button>
+      <button class="missbtn" onclick="score(0)">MISS</button>
+    </div>
+    <div class="actions">
+      <button onclick="undo()">↶ Undo</button>
+      <button onclick="prevShooter()">← Shooter</button>
+      <button onclick="nextShooter()">Shooter →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let state = {
+  shooters:['Chris','Tom','Marc'],
+  standCount:10,
+  targetsPerStand:10,
+  stand:0,
+  shooter:0,
+  target:0,
+  scores:{}
+};
+
+const STORAGE_KEY='clayClipboardStateV1';
+
+function saveState(){
+  try{
+    const payload={
+      state,
+      mode: !document.getElementById('scoring').classList.contains('hidden')
+        ? 'scoring'
+        : (!document.getElementById('finished').classList.contains('hidden') ? 'finished' : 'setup'),
+      overallVisible: document.getElementById('overallToggle')?.checked || false
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }catch(e){}
+}
+
+function restoreState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const saved=JSON.parse(raw);
+    if(!saved?.state) return;
+    state=saved.state;
+
+    document.getElementById('standCount').value=state.standCount || 10;
+    document.getElementById('targetsPerStand').value=state.targetsPerStand || 10;
+    renderShooters();
+
+    if(saved.mode==='scoring'){
+      document.getElementById('setup').classList.add('hidden');
+      document.getElementById('finished').classList.add('hidden');
+      document.getElementById('scoring').classList.remove('hidden');
+      document.getElementById('controls').classList.remove('hidden');
+      document.getElementById('overallToggle').checked=!!saved.overallVisible;
+      render();
+      toggleOverall();
+    } else if(saved.mode==='finished'){
+      document.getElementById('setup').classList.add('hidden');
+      document.getElementById('scoring').classList.add('hidden');
+      document.getElementById('controls').classList.add('hidden');
+      document.getElementById('finished').classList.remove('hidden');
+    }
+  }catch(e){}
+}
+
+function clearSavedState(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+}
+
+
+function renderShooters(){
+  const el=document.getElementById('shooters');
+  el.innerHTML='';
+  state.shooters.forEach((name,i)=>{
+    const row=document.createElement('div');
+    row.className='shooter-row';
+    row.innerHTML=`
+      <input value="${name}" oninput="state.shooters[${i}]=this.value;saveState()">
+      <button class="secondary" onclick="move(${i},-1)">↑</button>
+      <button class="secondary" onclick="move(${i},1)">↓</button>
+      <button class="danger" onclick="removeShooter(${i})">×</button>`;
+    el.appendChild(row);
+  });
+}
+function addShooter(){ state.shooters.push('Shooter '+(state.shooters.length+1)); 
+let editStand=null, editShooter=null;
+
+function openEdit(st,sh){
+  editStand=st; editShooter=sh;
+  document.getElementById('editModal').classList.remove('hidden');
+  renderEdit();
+}
+function closeEdit(e){
+  if(e && e.target && e.target.id!=='editModal') return;
+  document.getElementById('editModal').classList.add('hidden');
+  editStand=null; editShooter=null;
+  render();
+}
+function renderEdit(){
+  const arr=ensure(editStand,editShooter);
+  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  const grid=document.getElementById('editGrid'); grid.innerHTML='';
+  arr.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
+    b.textContent=v===1?'✓':v===0?'×':(i+1);
+    b.onclick=()=>cycleEditTarget(i);
+    grid.appendChild(b);
+  });
+}
+function cycleEditTarget(i){
+  const arr=ensure(editStand,editShooter);
+  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
+  renderEdit();
+  saveState();
+}
+function clearEditedShooter(){
+  const arr=ensure(editStand,editShooter);
+  for(let i=0;i<arr.length;i++) arr[i]=null;
+  renderEdit();
+  saveState();
+}
+
+renderShooters();
+ }
+function removeShooter(i){ if(state.shooters.length>1){state.shooters.splice(i,1);
+let editStand=null, editShooter=null;
+
+function openEdit(st,sh){
+  editStand=st; editShooter=sh;
+  document.getElementById('editModal').classList.remove('hidden');
+  renderEdit();
+}
+function closeEdit(e){
+  if(e && e.target && e.target.id!=='editModal') return;
+  document.getElementById('editModal').classList.add('hidden');
+  editStand=null; editShooter=null;
+  render();
+}
+function renderEdit(){
+  const arr=ensure(editStand,editShooter);
+  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  const grid=document.getElementById('editGrid'); grid.innerHTML='';
+  arr.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
+    b.textContent=v===1?'✓':v===0?'×':(i+1);
+    b.onclick=()=>cycleEditTarget(i);
+    grid.appendChild(b);
+  });
+}
+function cycleEditTarget(i){
+  const arr=ensure(editStand,editShooter);
+  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
+  renderEdit();
+  saveState();
+}
+function clearEditedShooter(){
+  const arr=ensure(editStand,editShooter);
+  for(let i=0;i<arr.length;i++) arr[i]=null;
+  renderEdit();
+  saveState();
+}
+
+renderShooters();
+} }
+function move(i,d){const j=i+d;if(j<0||j>=state.shooters.length)return;[state.shooters[i],state.shooters[j]]=[state.shooters[j],state.shooters[i]];
+let editStand=null, editShooter=null;
+
+function openEdit(st,sh){
+  editStand=st; editShooter=sh;
+  document.getElementById('editModal').classList.remove('hidden');
+  renderEdit();
+}
+function closeEdit(e){
+  if(e && e.target && e.target.id!=='editModal') return;
+  document.getElementById('editModal').classList.add('hidden');
+  editStand=null; editShooter=null;
+  render();
+}
+function renderEdit(){
+  const arr=ensure(editStand,editShooter);
+  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  const grid=document.getElementById('editGrid'); grid.innerHTML='';
+  arr.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
+    b.textContent=v===1?'✓':v===0?'×':(i+1);
+    b.onclick=()=>cycleEditTarget(i);
+    grid.appendChild(b);
+  });
+}
+function cycleEditTarget(i){
+  const arr=ensure(editStand,editShooter);
+  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
+  renderEdit();
+  saveState();
+}
+function clearEditedShooter(){
+  const arr=ensure(editStand,editShooter);
+  for(let i=0;i<arr.length;i++) arr[i]=null;
+  renderEdit();
+  saveState();
+}
+
+renderShooters();
+}
+function key(st,sh){return `${st}_${sh}`;}
+function ensure(st,sh){
+  const k=key(st,sh);
+  if(!state.scores[k]) state.scores[k]=Array(state.targetsPerStand).fill(null);
+  return state.scores[k];
+}
+function startRound(){
+  state.standCount=parseInt(document.getElementById('standCount').value)||10;
+  state.targetsPerStand=parseInt(document.getElementById('targetsPerStand').value)||10;
+  state.stand=0;state.shooter=0;state.target=0;state.scores={};
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('scoring').classList.remove('hidden');
+  document.getElementById('controls').classList.remove('hidden');
+  render();
+  saveState();
+}
+function score(v){
+  const arr=ensure(state.stand,state.shooter);
+  arr[state.target]=v;
+  saveState();
+  advance();
+}
+function advance(){
+  const arr=ensure(state.stand,state.shooter);
+  let next=arr.findIndex((v,i)=>i>state.target && v===null);
+  if(next!==-1){ state.target=next; render(); return; }
+
+  // shooter finished
+  if(state.shooter < state.shooters.length-1){
+    state.shooter++;
+    state.target=firstOpen(state.stand,state.shooter);
+    render(); return;
+  }
+
+  // stand finished
+  if(state.stand < state.standCount-1){
+    state.stand++;
+    state.shooter=0;
+    state.target=firstOpen(state.stand,0);
+    render(); return;
+  }
+
+  finish();
+}
+function firstOpen(st,sh){
+  const arr=ensure(st,sh);
+  const i=arr.findIndex(v=>v===null);
+  return i===-1 ? arr.length-1 : i;
+}
+function undo(){
+  const arr=ensure(state.stand,state.shooter);
+  for(let i=state.target;i>=0;i--){
+    if(arr[i]!==null){arr[i]=null;state.target=i;render();return;}
+  }
+  if(state.shooter>0){
+    state.shooter--;
+    const a=ensure(state.stand,state.shooter);
+    for(let i=a.length-1;i>=0;i--) if(a[i]!==null){a[i]=null;state.target=i;render();return;}
+  } else if(state.stand>0){
+    state.stand--; state.shooter=state.shooters.length-1;
+    const a=ensure(state.stand,state.shooter);
+    for(let i=a.length-1;i>=0;i--) if(a[i]!==null){a[i]=null;state.target=i;render();return;}
+  }
+}
+function prevShooter(){
+  if(state.shooter>0){state.shooter--;state.target=firstOpen(state.stand,state.shooter);render();saveState();}
+}
+function nextShooter(){
+  if(state.shooter<state.shooters.length-1){state.shooter++;state.target=firstOpen(state.stand,state.shooter);render();saveState();}
+}
+function shooterRoundTotal(sh){
+  let hits=0;
+  for(let st=0;st<state.standCount;st++) hits+=ensure(st,sh).filter(v=>v===1).length;
+  return hits;
+}
+function toggleOverall(){
+  const box=document.getElementById('overallBox');
+  const on=document.getElementById('overallToggle').checked;
+  box.classList.toggle('hidden', !on);
+  if(on) updateOverallDisplay();
+  saveState();
+}
+
+function updateOverallDisplay(){
+  const el=document.getElementById('overallScore');
+  if(!el) return;
+  let hits=0, entered=0;
+  for(let st=0;st<state.standCount;st++){
+    const arr=ensure(st,state.shooter);
+    arr.forEach(v=>{
+      if(v!==null) entered++;
+      if(v===1) hits++;
+    });
+  }
+  el.textContent=`${hits}/${entered}`;
+}
+
+function render(){
+  const arr=ensure(state.stand,state.shooter);
+  document.getElementById('standLabel').textContent=`Stand ${state.stand+1} of ${state.standCount}`;
+  document.getElementById('shooterName').textContent=state.shooters[state.shooter];
+  document.getElementById('targetLabel').textContent=`Target ${state.target+1} of ${state.targetsPerStand}`;
+  const overallLabel=document.querySelector('#overallBox .tiny');
+  if(overallLabel) overallLabel.textContent=`${state.shooters[state.shooter]}'s current overall score`;
+
+  const dots=document.getElementById('dots'); dots.innerHTML='';
+  arr.forEach((v,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(v===1?' hit':v===0?' miss':'')+(i===state.target?' current':'');
+    d.textContent=v===1?'✓':v===0?'×':(i+1);
+    dots.appendChild(d);
+  });
+
+  document.getElementById('standScore').textContent=`${arr.filter(v=>v===1).length}/${state.targetsPerStand}`;
+  if(document.getElementById('overallToggle')?.checked) updateOverallDisplay();
+
+  const totals=document.getElementById('standTotals'); totals.innerHTML='';
+  state.shooters.forEach((s,sh)=>{
+    const a=ensure(state.stand,sh);
+    const done=a.filter(v=>v!==null).length;
+    const hits=a.filter(v=>v===1).length;
+    const line=document.createElement('div');line.className='scoreline';
+    line.innerHTML=`<span>${s}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <strong>${hits}/${state.targetsPerStand} <span class="tiny">${done===state.targetsPerStand?'done':done+' entered'}</span></strong>
+        <button class="secondary" style="padding:7px 10px" onclick="openEdit(${state.stand},${sh})">Edit</button>
+      </span>`;
+    totals.appendChild(line);
+  });
+}
+function finish(){
+  document.getElementById('scoring').classList.add('hidden');
+  document.getElementById('controls').classList.add('hidden');
+  document.getElementById('finished').classList.remove('hidden');
+  document.getElementById('finalCard').classList.add('hidden');
+  document.getElementById('scoreCardBtn').classList.remove('hidden');
+}
+
+function scoreTheCard(){
+  const f=document.getElementById('finalScores');
+  f.innerHTML='';
+  state.shooters.forEach((s,sh)=>{
+    const line=document.createElement('div');
+    line.className='scoreline';
+    line.innerHTML=`<span><strong>${s}</strong></span><strong>${shooterRoundTotal(sh)}/${state.standCount*state.targetsPerStand}</strong>`;
+    f.appendChild(line);
+  });
+  document.getElementById('scoreCardBtn').classList.add('hidden');
+  document.getElementById('finalCard').classList.remove('hidden');
+}
+
+function newRound(){
+  clearSavedState();
+  location.reload();
+}
+
+
+let editStand=null, editShooter=null;
+
+function openEdit(st,sh){
+  editStand=st; editShooter=sh;
+  document.getElementById('editModal').classList.remove('hidden');
+  renderEdit();
+}
+function closeEdit(e){
+  if(e && e.target && e.target.id!=='editModal') return;
+  document.getElementById('editModal').classList.add('hidden');
+  editStand=null; editShooter=null;
+  render();
+}
+function renderEdit(){
+  const arr=ensure(editStand,editShooter);
+  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  const grid=document.getElementById('editGrid'); grid.innerHTML='';
+  arr.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
+    b.textContent=v===1?'✓':v===0?'×':(i+1);
+    b.onclick=()=>cycleEditTarget(i);
+    grid.appendChild(b);
+  });
+}
+function cycleEditTarget(i){
+  const arr=ensure(editStand,editShooter);
+  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
+  renderEdit();
+  saveState();
+}
+function clearEditedShooter(){
+  const arr=ensure(editStand,editShooter);
+  for(let i=0;i<arr.length;i++) arr[i]=null;
+  renderEdit();
+  saveState();
+}
+
+renderShooters();
+
+</script>
+
+<div id="editModal" class="modalBack hidden" onclick="closeEdit(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="editTitle">Edit Score</h2>
+    <div id="editSub" class="subline"></div>
+    <div id="editGrid" class="editgrid"></div>
+    <div class="tiny">Tap a target to cycle: blank → hit → miss → blank.</div>
+    <div class="modalBtns">
+      <button class="secondary" onclick="closeEdit()">Done</button>
+      <button class="danger" onclick="clearEditedShooter()">Clear Shooter</button>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>
