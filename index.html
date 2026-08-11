@@ -123,7 +123,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
 <body>
 
 <div id="updateBanner" class="hidden">
-  <div><strong>Update available</strong><div style="font-size:12px;opacity:.8">Tap once to refresh Clay Clipboard.</div></div>
+  <div><strong>Clay Clipboard update available</strong><div style="font-size:12px;opacity:.8">Tap Update to install it. Your current scores will stay saved.</div></div>
   <button onclick="applyUpdate()">Update</button>
 </div>
 
@@ -672,17 +672,56 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 
-let waitingWorker=null;
+const APP_VERSION=11;
+let availableVersion=null;
+let swRegistration=null;
+let refreshing=false;
 
-function showUpdateBanner(worker){
-  waitingWorker=worker;
-  document.getElementById('updateBanner')?.classList.remove('hidden');
+function showUpdateBanner(version){
+  availableVersion=version || null;
+  const banner=document.getElementById('updateBanner');
+  if(banner) banner.classList.remove('hidden');
 }
 
-function applyUpdate(){
-  if(waitingWorker){
-    waitingWorker.postMessage({type:'SKIP_WAITING'});
-  } else {
+async function checkForAppUpdate(){
+  if(!navigator.onLine) return;
+  try{
+    // Cache-busting query plus no-store makes this independent of normal app caching.
+    const response=await fetch('./version.json?ts='+Date.now(), {
+      cache:'no-store',
+      headers:{'Cache-Control':'no-cache'}
+    });
+    if(!response.ok) return;
+    const remote=await response.json();
+    const remoteVersion=Number(remote.version || 0);
+    if(remoteVersion > APP_VERSION){
+      showUpdateBanner(remoteVersion);
+    }
+  }catch(e){}
+}
+
+async function applyUpdate(){
+  try{
+    saveState();
+
+    // Force the browser to fetch the current service worker and app shell.
+    if(swRegistration){
+      await swRegistration.update().catch(()=>{});
+    }
+
+    // Remove old cached app files. Local score data is stored separately
+    // in localStorage and is intentionally left untouched.
+    const keys=await caches.keys();
+    await Promise.all(keys.map(key=>caches.delete(key)));
+
+    if(swRegistration?.waiting){
+      swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
+      return;
+    }
+
+    // A cache-busted reload forces the current GitHub Pages files.
+    location.replace('./?updated='+(availableVersion || Date.now()));
+  }catch(e){
     location.reload();
   }
 }
@@ -690,32 +729,34 @@ function applyUpdate(){
 if('serviceWorker' in navigator){
   window.addEventListener('load', async ()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./service-worker.js');
+      swRegistration=await navigator.serviceWorker.register('./service-worker.js');
 
-      if(reg.waiting) showUpdateBanner(reg.waiting);
+      if(swRegistration.waiting){
+        swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
+      }
 
-      reg.addEventListener('updatefound', ()=>{
-        const newWorker=reg.installing;
-        if(!newWorker) return;
-        newWorker.addEventListener('statechange', ()=>{
-          if(newWorker.state==='installed' && navigator.serviceWorker.controller){
-            showUpdateBanner(newWorker);
+      swRegistration.addEventListener('updatefound', ()=>{
+        const worker=swRegistration.installing;
+        if(!worker) return;
+        worker.addEventListener('statechange', ()=>{
+          if(worker.state==='installed' && navigator.serviceWorker.controller){
+            showUpdateBanner(availableVersion);
           }
         });
       });
 
-      // Check for updates whenever the app is opened while online.
-      if(navigator.onLine) reg.update().catch(()=>{});
-
-      window.addEventListener('online', ()=>{
-        reg.update().catch(()=>{});
-      });
-
-      let refreshing=false;
       navigator.serviceWorker.addEventListener('controllerchange', ()=>{
         if(refreshing) return;
         refreshing=true;
-        location.reload();
+        location.replace('./?updated='+(availableVersion || Date.now()));
+      });
+
+      await checkForAppUpdate();
+      window.addEventListener('online', checkForAppUpdate);
+
+      // Also check when the app returns to the foreground.
+      document.addEventListener('visibilitychange', ()=>{
+        if(document.visibilityState==='visible') checkForAppUpdate();
       });
     }catch(e){}
   });

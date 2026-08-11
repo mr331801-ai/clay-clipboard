@@ -1,4 +1,4 @@
-const CACHE='clay-clipboard-v5';
+const CACHE='clay-clipboard-v11';
 const ASSETS=[
   './',
   './index.html',
@@ -20,7 +20,9 @@ self.addEventListener('message', event=>{
 
 self.addEventListener('activate', event=>{
   event.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+    caches.keys().then(keys=>Promise.all(
+      keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))
+    ))
   );
   self.clients.claim();
 });
@@ -29,6 +31,18 @@ self.addEventListener('fetch', event=>{
   if(event.request.method!=='GET') return;
 
   const url=new URL(event.request.url);
+
+  // Never serve the version checker from cache.
+  if(url.pathname.endsWith('/version.json')){
+    event.respondWith(
+      fetch(event.request, {cache:'no-store'})
+        .catch(()=>new Response(JSON.stringify({version:11}), {
+          headers:{'Content-Type':'application/json'}
+        }))
+    );
+    return;
+  }
+
   const isAppShell =
     url.pathname.endsWith('/') ||
     url.pathname.endsWith('/index.html') ||
