@@ -1,4 +1,4 @@
-const CACHE='clay-clipboard-v4';
+const CACHE='clay-clipboard-v5';
 const ASSETS=[
   './',
   './index.html',

@@ -130,7 +130,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
 <div class="wrap">
   <div id="setup">
     <h1>Clay Clipboard</h1>
-    <div class="sub">One shooter at a time. Fixed order. Big HIT / MISS buttons.</div>
+    <div class="sub">Simple sporting clays scorekeeping.</div>
 
     <div class="card">
       <div class="setup-grid">
@@ -143,7 +143,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
           <input id="targetsPerStand" type="number" min="1" max="20" value="10">
         </div>
       </div>
-      <div class="tiny" style="margin-top:8px">You can change targets at individual stands later in a future version. For this test, every stand uses the same number.</div>
+      <div class="tiny" style="margin-top:8px">Set the number of stands and targets per stand for today’s round.</div>
     </div>
 
     <div class="card">
@@ -152,10 +152,10 @@ button, .hitbtn, .missbtn, .actions, .bottom {
         <button class="secondary" onclick="addShooter()">+ Add</button>
       </div>
       <div id="shooters"></div>
-      <div class="tiny" style="margin-top:8px">This order stays the same at every stand.</div>
+      <div class="tiny" style="margin-top:8px">Shooter order stays the same at every stand.</div>
     </div>
 
-    <button class="primary" style="width:100%;padding:16px" onclick="startRound()">Start Test Round</button>
+    <button class="primary" style="width:100%;padding:16px" onclick="startRound()">Start Round</button>
   </div>
 
   <div id="scoring" class="hidden">
