@@ -131,7 +131,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
   <div id="setup">
     <h1>Clay Clipboard</h1>
     <div class="sub">Simple sporting clays scorekeeping.</div>
-    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 12</div>
+    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 13</div>
 
     <div class="card">
       <div class="setup-grid">
@@ -140,11 +140,11 @@ button, .hitbtn, .missbtn, .actions, .bottom {
           <input id="standCount" type="number" min="1" max="30" value="10">
         </div>
         <div>
-          <label>Targets per stand</label>
-          <input id="targetsPerStand" type="number" min="1" max="20" value="10">
+          <label>Total targets in round</label>
+          <input id="roundTargetTotal" type="number" min="1" max="500" value="100">
         </div>
       </div>
-      <div class="tiny" style="margin-top:8px">Set the number of stands and targets per stand for today’s round.</div>
+      <div class="tiny" style="margin-top:8px">Set the number of stands and total targets for today’s round.</div>
     </div>
 
     <div class="card">
@@ -162,6 +162,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
   <div id="scoring" class="hidden">
     <div class="card hero">
       <div class="kicker" id="standLabel">Stand 1 of 10</div>
+      <div class="tiny" id="roundProgress" style="margin-top:6px"></div>
       <div class="name" id="shooterName">Chris</div>
       <div class="progress" id="targetLabel">Target 1 of 10</div>
       <div class="dots" id="dots"></div>
@@ -221,7 +222,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
     </div>
     <div class="actions">
       <button onclick="undo()">↶ Undo</button>
-      <button onclick="prevShooter()">← Shooter</button>
+      <button id="completeStandBtn" onclick="completeStandDefinition()">Complete Stand</button>
       <button onclick="nextShooter()">Shooter →</button>
     </div>
   </div>
@@ -229,9 +230,11 @@ button, .hitbtn, .missbtn, .actions, .bottom {
 
 <script>
 let state = {
-  shooters:['Chris','Tom','Marc'],
+  shooters:[],
   standCount:10,
   targetsPerStand:10,
+  roundTargetTotal:100,
+  standTargets:{},
   stand:0,
   shooter:0,
   target:0,
@@ -262,7 +265,7 @@ function restoreState(){
     state=saved.state;
 
     document.getElementById('standCount').value=state.standCount || 10;
-    document.getElementById('targetsPerStand').value=state.targetsPerStand || 10;
+    document.getElementById('roundTargetTotal').value=state.roundTargetTotal || 100;
     renderShooters();
 
     if(saved.mode==='scoring'){
@@ -291,6 +294,14 @@ function clearSavedState(){
 function renderShooters(){
   const el=document.getElementById('shooters');
   el.innerHTML='';
+  if(state.shooters.length===0){
+    const empty=document.createElement('div');
+    empty.className='tiny';
+    empty.style.marginTop='10px';
+    empty.textContent='No shooters added yet.';
+    el.appendChild(empty);
+    return;
+  }
   state.shooters.forEach((name,i)=>{
     const row=document.createElement('div');
     row.className='shooter-row';
@@ -319,7 +330,7 @@ function closeEdit(e){
 function renderEdit(){
   const arr=ensure(editStand,editShooter);
   document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
   const grid=document.getElementById('editGrid'); grid.innerHTML='';
   arr.forEach((v,i)=>{
     const b=document.createElement('button');
@@ -361,7 +372,7 @@ function closeEdit(e){
 function renderEdit(){
   const arr=ensure(editStand,editShooter);
   document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
   const grid=document.getElementById('editGrid'); grid.innerHTML='';
   arr.forEach((v,i)=>{
     const b=document.createElement('button');
@@ -403,7 +414,7 @@ function closeEdit(e){
 function renderEdit(){
   const arr=ensure(editStand,editShooter);
   document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
   const grid=document.getElementById('editGrid'); grid.innerHTML='';
   arr.forEach((v,i)=>{
     const b=document.createElement('button');
@@ -431,13 +442,26 @@ renderShooters();
 function key(st,sh){return `${st}_${sh}`;}
 function ensure(st,sh){
   const k=key(st,sh);
-  if(!state.scores[k]) state.scores[k]=Array(state.targetsPerStand).fill(null);
+  const known=state.standTargets?.[st] || null;
+  const len=known || 1;
+  if(!state.scores[k]) state.scores[k]=Array(len).fill(null);
+  if(known && state.scores[k].length!==known){
+    const old=state.scores[k];
+    state.scores[k]=Array.from({length:known},(_,i)=>old[i] ?? null);
+  }
   return state.scores[k];
 }
 function startRound(){
+  state.shooters=state.shooters.map(s=>s.trim()).filter(Boolean);
+  if(state.shooters.length===0){
+    alert('Add at least one shooter before starting the round.');
+    renderShooters();
+    return;
+  }
   state.standCount=parseInt(document.getElementById('standCount').value)||10;
-  state.targetsPerStand=parseInt(document.getElementById('targetsPerStand').value)||10;
-  state.stand=0;state.shooter=0;state.target=0;state.scores={};
+  state.roundTargetTotal=parseInt(document.getElementById('roundTargetTotal').value)||100;
+  state.stand=0; state.shooter=0; state.target=0;
+  state.scores={}; state.standTargets={};
   document.getElementById('setup').classList.add('hidden');
   document.getElementById('scoring').classList.remove('hidden');
   document.getElementById('controls').classList.remove('hidden');
@@ -445,8 +469,69 @@ function startRound(){
   saveState();
   requestWakeLock();
 }
+
+function currentStandTargetCount(){
+  return state.standTargets?.[state.stand] || null;
+}
+
+function actualEnteredCount(st,sh){
+  return ensure(st,sh).filter(v=>v!==null).length;
+}
+
+function setStandTargetCount(st,count){
+  if(!state.standTargets) state.standTargets={};
+  state.standTargets[st]=count;
+  state.shooters.forEach((_,sh)=>{
+    const k=key(st,sh);
+    const old=state.scores[k] || [];
+    state.scores[k]=Array.from({length:count},(_,i)=>old[i] ?? null);
+  });
+}
+
+function completeStandDefinition(){
+  if(state.shooter!==0 || currentStandTargetCount()) return;
+  const entered=actualEnteredCount(state.stand,0);
+  if(entered===0){
+    alert('Enter at least one target before completing the stand.');
+    return;
+  }
+  setStandTargetCount(state.stand, entered);
+  if(state.shooters.length>1){
+    state.shooter=1;
+    state.target=firstOpen(state.stand,1);
+    render(); saveState();
+  } else {
+    advanceToNextStandOrFinish();
+  }
+}
+
+function advanceToNextStandOrFinish(){
+  if(state.stand < state.standCount-1){
+    state.stand++;
+    state.shooter=0;
+    state.target=0;
+    ensure(state.stand,0);
+    render(); saveState();
+  } else {
+    finish();
+  }
+}
+
 function score(v){
-  const arr=ensure(state.stand,state.shooter);
+  let arr=ensure(state.stand,state.shooter);
+  const known=currentStandTargetCount();
+
+  if(state.shooter===0 && !known){
+    const blank=arr.findIndex(x=>x===null);
+    if(blank!==-1) arr[blank]=v;
+    else arr.push(v);
+    arr.push(null);
+    state.target=arr.length-1;
+    saveState();
+    render();
+    return;
+  }
+
   arr[state.target]=v;
   saveState();
   advance();
@@ -454,29 +539,27 @@ function score(v){
 function advance(){
   const arr=ensure(state.stand,state.shooter);
   let next=arr.findIndex((v,i)=>i>state.target && v===null);
-  if(next!==-1){ state.target=next; render(); return; }
-
-  // shooter finished
-  if(state.shooter < state.shooters.length-1){
-    state.shooter++;
-    state.target=firstOpen(state.stand,state.shooter);
-    render(); return;
+  if(next!==-1){
+    state.target=next;
+    render();
+    return;
   }
 
-  // stand finished
-  if(state.stand < state.standCount-1){
-    state.stand++;
-    state.shooter=0;
-    state.target=firstOpen(state.stand,0);
-    render(); return;
+  const expected=currentStandTargetCount();
+  if(expected && actualEnteredCount(state.stand,state.shooter)>=expected){
+    if(state.shooter < state.shooters.length-1){
+      state.shooter++;
+      state.target=firstOpen(state.stand,state.shooter);
+      render(); saveState();
+      return;
+    }
+    advanceToNextStandOrFinish();
   }
-
-  finish();
 }
 function firstOpen(st,sh){
   const arr=ensure(st,sh);
   const i=arr.findIndex(v=>v===null);
-  return i===-1 ? arr.length-1 : i;
+  return i===-1 ? Math.max(0,arr.length-1) : i;
 }
 function undo(){
   const arr=ensure(state.stand,state.shooter);
@@ -504,45 +587,42 @@ function shooterRoundTotal(sh){
   for(let st=0;st<state.standCount;st++) hits+=ensure(st,sh).filter(v=>v===1).length;
   return hits;
 }
-function toggleOverall(){
-  const box=document.getElementById('overallBox');
-  const on=document.getElementById('overallToggle').checked;
-  box.classList.toggle('hidden', !on);
-  if(on) updateOverallDisplay();
-  saveState();
-}
 
-function updateOverallDisplay(){
-  const el=document.getElementById('overallScore');
-  if(!el) return;
-  let hits=0, entered=0;
-  for(let st=0;st<state.standCount;st++){
-    const arr=ensure(st,state.shooter);
-    arr.forEach(v=>{
-      if(v!==null) entered++;
-      if(v===1) hits++;
-    });
-  }
-  el.textContent=`${hits}/${entered}`;
+function roundTargetsCompleted(){
+  let total=0;
+  for(let st=0;st<state.standCount;st++) total += state.standTargets?.[st] || 0;
+  return total;
 }
-
 function render(){
   const arr=ensure(state.stand,state.shooter);
   document.getElementById('standLabel').textContent=`Stand ${state.stand+1} of ${state.standCount}`;
+  const defined=roundTargetsCompleted();
+  const rp=document.getElementById('roundProgress');
+  if(rp) rp.textContent=`Round progress: ${defined}/${state.roundTargetTotal} targets defined`;
   document.getElementById('shooterName').textContent=state.shooters[state.shooter];
-  document.getElementById('targetLabel').textContent=`Target ${state.target+1} of ${state.targetsPerStand}`;
+  const known=currentStandTargetCount();
+  if(state.shooter===0 && !known){
+    const entered=actualEnteredCount(state.stand,state.shooter);
+    document.getElementById('targetLabel').textContent=`${entered} target${entered===1?'':'s'} entered`;
+  } else {
+    document.getElementById('targetLabel').textContent=`Target ${Math.min(state.target+1,known || 1)} of ${known || 1}`;
+  }
+  const completeBtn=document.getElementById('completeStandBtn');
+  if(completeBtn) completeBtn.style.display=(state.shooter===0 && !known)?'block':'none';
   const overallLabel=document.querySelector('#overallBox .tiny');
   if(overallLabel) overallLabel.textContent=`${state.shooters[state.shooter]}'s current overall score`;
 
   const dots=document.getElementById('dots'); dots.innerHTML='';
   arr.forEach((v,i)=>{
+    if(state.shooter===0 && !known && v===null) return;
     const d=document.createElement('div');
     d.className='dot'+(v===1?' hit':v===0?' miss':'')+(i===state.target?' current':'');
     d.textContent=v===1?'✓':v===0?'×':(i+1);
     dots.appendChild(d);
   });
 
-  document.getElementById('standScore').textContent=`${arr.filter(v=>v===1).length}/${state.targetsPerStand}`;
+  const standDenom=known || actualEnteredCount(state.stand,state.shooter);
+  document.getElementById('standScore').textContent=`${arr.filter(v=>v===1).length}/${standDenom || 0}`;
   if(document.getElementById('overallToggle')?.checked) updateOverallDisplay();
 
   const totals=document.getElementById('standTotals'); totals.innerHTML='';
@@ -551,9 +631,10 @@ function render(){
     const done=a.filter(v=>v!==null).length;
     const hits=a.filter(v=>v===1).length;
     const line=document.createElement('div');line.className='scoreline';
+    const denom=state.standTargets?.[state.stand] || done;
     line.innerHTML=`<span>${s}</span>
       <span style="display:flex;align-items:center;gap:8px">
-        <strong>${hits}/${state.targetsPerStand} <span class="tiny">${done===state.targetsPerStand?'done':done+' entered'}</span></strong>
+        <strong>${hits}/${denom || 0} <span class="tiny">${(state.standTargets?.[state.stand] && done===denom)?'done':done+' entered'}</span></strong>
         <button class="secondary" style="padding:7px 10px" onclick="openEdit(${state.stand},${sh})">Edit</button>
       </span>`;
     totals.appendChild(line);
@@ -603,7 +684,7 @@ function closeEdit(e){
 function renderEdit(){
   const arr=ensure(editStand,editShooter);
   document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.targetsPerStand} targets`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
   const grid=document.getElementById('editGrid'); grid.innerHTML='';
   arr.forEach((v,i)=>{
     const b=document.createElement('button');
@@ -673,7 +754,7 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 
-const APP_VERSION=12;
+const APP_VERSION=13;
 let availableVersion=null;
 let swRegistration=null;
 let refreshing=false;

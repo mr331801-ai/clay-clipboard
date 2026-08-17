@@ -1,4 +1,4 @@
-const CACHE='clay-clipboard-v12';
+const CACHE='clay-clipboard-v13';
 const ASSETS=[
   './',
   './index.html',
@@ -36,7 +36,7 @@ self.addEventListener('fetch', event=>{
   if(url.pathname.endsWith('/version.json')){
     event.respondWith(
       fetch(event.request, {cache:'no-store'})
-        .catch(()=>new Response(JSON.stringify({version:12}), {
+        .catch(()=>new Response(JSON.stringify({version:13}), {
           headers:{'Content-Type':'application/json'}
         }))
     );
