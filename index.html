@@ -131,7 +131,7 @@ button, .hitbtn, .missbtn, .actions, .bottom {
   <div id="setup">
     <h1>Clay Clipboard</h1>
     <div class="sub">Simple sporting clays scorekeeping.</div>
-    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 13</div>
+    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 14</div>
 
     <div class="card">
       <div class="setup-grid">
@@ -582,6 +582,42 @@ function prevShooter(){
 function nextShooter(){
   if(state.shooter<state.shooters.length-1){state.shooter++;state.target=firstOpen(state.stand,state.shooter);render();saveState();}
 }
+
+function toggleOverall(){
+  const toggle=document.getElementById('overallToggle');
+  const box=document.getElementById('overallBox');
+  if(!toggle || !box) return;
+
+  const on=toggle.checked;
+  box.classList.toggle('hidden', !on);
+
+  if(on) updateOverallDisplay();
+  saveState();
+}
+
+function updateOverallDisplay(){
+  const el=document.getElementById('overallScore');
+  if(!el) return;
+
+  let hits=0;
+  let entered=0;
+
+  for(let st=0; st<state.standCount; st++){
+    const arr=ensure(st,state.shooter);
+    arr.forEach(v=>{
+      if(v!==null) entered++;
+      if(v===1) hits++;
+    });
+  }
+
+  el.textContent=`${hits}/${entered}`;
+
+  const label=document.querySelector('#overallBox .tiny');
+  if(label){
+    label.textContent=`${state.shooters[state.shooter]}'s current overall score`;
+  }
+}
+
 function shooterRoundTotal(sh){
   let hits=0;
   for(let st=0;st<state.standCount;st++) hits+=ensure(st,sh).filter(v=>v===1).length;
@@ -754,7 +790,7 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 
-const APP_VERSION=13;
+const APP_VERSION=14;
 let availableVersion=null;
 let swRegistration=null;
 let refreshing=false;
