@@ -15,38 +15,41 @@
   --hit:#1f7a3f; --miss:#b53b32; --accent:#d87521; --line:#ddd8cf;
 }
 *{box-sizing:border-box}
+html,body{overscroll-behavior:none}
 body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
-.wrap{max-width:520px;margin:auto;padding:16px 16px 140px}
+.wrap{max-width:540px;margin:auto;padding:16px 16px 150px}
 .card{background:#fff;border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 2px 10px rgba(0,0,0,.06)}
 h1{margin:4px 0 2px;font-size:28px}
 .sub{color:var(--muted);font-size:14px;margin-bottom:12px}
 .row{display:flex;gap:10px;align-items:center}
-input,button{font:inherit}
-input{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white}
-button{border:0;border-radius:14px;padding:12px 14px;font-weight:800}
+input,button,select{font:inherit}
+input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white}
+button{border:0;border-radius:14px;padding:12px 14px;font-weight:800;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 button.secondary{background:#e9e7e1}
 button.primary{background:var(--accent);color:white}
 button.danger{background:#f4deda;color:#8c251d}
+button.green{background:var(--hit);color:white}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-.shooter-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-top:8px}
+.tiny{font-size:12px;color:var(--muted)}
 .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.hero{text-align:center;padding:24px 14px}
+.shooter-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-top:8px}
+.orderChoice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.orderChoice button.selected{background:#171717;color:#fff}
+.hero{text-align:center;padding:22px 14px}
 .kicker{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.name{font-size:48px;font-weight:900;line-height:1.05;margin:12px 0}
-.progress{font-size:20px;color:var(--muted);font-weight:700}
+.name{font-size:46px;font-weight:900;line-height:1.05;margin:10px 0}
+.progress{font-size:19px;color:var(--muted);font-weight:700}
 .dots{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
 .dot{width:34px;height:34px;border-radius:9px;background:#eceae5;display:flex;align-items:center;justify-content:center;font-weight:900}
 .dot.hit{background:#e0f1e5;color:var(--hit);border:2px solid var(--hit)}
 .dot.miss{background:#f5dfdd;color:var(--miss);border:2px solid var(--miss)}
 .dot.current{outline:3px solid #222}
 .summary{display:flex;justify-content:space-between;gap:10px}
-.summary div{flex:1;background:#f5f4f1;border-radius:14px;padding:12px;text-align:center}
+.summary>div{flex:1;background:#f5f4f1;border-radius:14px;padding:12px;text-align:center}
 .summary b{display:block;font-size:24px}
-.bottom{
-  position:fixed;left:0;right:0;bottom:0;background:rgba(244,242,237,.97);
-  border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));backdrop-filter:blur(10px)
-}
-.bottom .inner{max-width:520px;margin:auto}
+.scoreline{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #eee}
+.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(244,242,237,.97);border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));backdrop-filter:blur(10px);z-index:20}
+.bottom .inner{max-width:540px;margin:auto}
 .bigbuttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bigbuttons button{height:78px;font-size:24px;border-radius:18px}
 .hitbtn{background:var(--hit);color:white}
@@ -54,27 +57,6 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 .actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
 .actions button{background:#e7e5df}
 .hidden{display:none!important}
-.scoreline{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #eee}
-.tiny{font-size:12px;color:var(--muted)}
-
-.modalBack{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;
-  padding:16px;z-index:50
-}
-.modal{
-  width:100%;max-width:520px;background:white;border-radius:22px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.25)
-}
-.modal h2{margin:0 0 4px;font-size:24px}
-.modal .subline{color:var(--muted);font-size:14px;margin-bottom:14px}
-.editgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
-.editTarget{
-  aspect-ratio:1;border-radius:14px;background:#efede8;border:2px solid transparent;
-  font-size:18px;font-weight:900
-}
-.editTarget.hit{background:#e0f1e5;border-color:var(--hit);color:var(--hit)}
-.editTarget.miss{background:#f5dfdd;border-color:var(--miss);color:var(--miss)}
-.modalBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-
 .toggleRow{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .switch{position:relative;display:inline-block;width:58px;height:32px;flex:0 0 auto}
 .switch input{opacity:0;width:0;height:0}
@@ -84,46 +66,26 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 .switch input:checked + .slider:before{transform:translateX(26px)}
 .overallBox{margin-top:12px;padding:12px;border-radius:14px;background:#f5f4f1;text-align:center}
 .overallBox b{font-size:28px;display:block}
-
-/* v7: prevent accidental double-tap zoom while rapid scoring */
-button, .hitbtn, .missbtn, .actions, .bottom {
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-
-/* v8: simple in-app update prompt */
-#updateBanner{
-  position:fixed;left:12px;right:12px;top:12px;z-index:1000;
-  max-width:520px;margin:auto;background:#171717;color:#fff;
-  border-radius:16px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,.28);
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-}
-#updateBanner.hidden{display:none!important}
-#updateBanner button{
-  background:#fff;color:#171717;border:0;border-radius:12px;padding:9px 12px;font-weight:800;
-}
-
-
-/* v9: screen wake lock status */
-#wakeStatus{
-  margin-top:8px;
-  font-size:12px;
-  color:var(--muted);
-  text-align:center;
-}
+#wakeStatus{margin-top:8px;font-size:12px;color:var(--muted);text-align:center}
 #wakeStatus.on{color:var(--hit);font-weight:700}
-
+.modalBack{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px;z-index:60}
+.modal{width:100%;max-width:540px;max-height:88vh;overflow:auto;background:white;border-radius:22px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.modal h2{margin:0 0 4px;font-size:24px}
+.modalBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.editgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.editTarget{aspect-ratio:1;border-radius:14px;background:#efede8;border:2px solid transparent;font-size:18px;font-weight:900}
+.editTarget.hit{background:#e0f1e5;border-color:var(--hit);color:var(--hit)}
+.editTarget.miss{background:#f5dfdd;border-color:var(--miss);color:var(--miss)}
+.standGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.standBtn{background:#efede8;text-align:left;padding:10px}
+.standBtn.done{background:#e0f1e5}
+#updateBanner{position:fixed;left:12px;right:12px;top:12px;z-index:1000;max-width:540px;margin:auto;background:#171717;color:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 8px 30px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#updateBanner button{background:#fff;color:#171717;padding:9px 12px}
 </style>
-
-
 </head>
 <body>
-
 <div id="updateBanner" class="hidden">
-  <div><strong>Clay Clipboard update available</strong><div style="font-size:12px;opacity:.8">Tap Update to install it. Your current scores will stay saved.</div></div>
+  <div><strong>Clay Clipboard update available</strong><div style="font-size:12px;opacity:.8">Tap Update to install it. Current scores stay saved.</div></div>
   <button onclick="applyUpdate()">Update</button>
 </div>
 
@@ -131,29 +93,37 @@ button, .hitbtn, .missbtn, .actions, .bottom {
   <div id="setup">
     <h1>Clay Clipboard</h1>
     <div class="sub">Simple sporting clays scorekeeping.</div>
-    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 14</div>
+    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 15</div>
 
     <div class="card">
       <div class="setup-grid">
         <div>
-          <label>Number of stands</label>
-          <input id="standCount" type="number" min="1" max="30" value="10">
+          <label>Planned stands</label>
+          <input id="standCount" type="number" min="1" max="50" value="10">
         </div>
         <div>
           <label>Total targets in round</label>
           <input id="roundTargetTotal" type="number" min="1" max="500" value="100">
         </div>
       </div>
-      <div class="tiny" style="margin-top:8px">Set the number of stands and total targets for today’s round.</div>
+      <div class="tiny" style="margin-top:8px">Stand length can vary. The first shooter at each stand sets the number of targets.</div>
+    </div>
+
+    <div class="card">
+      <strong>Shooting order</strong>
+      <div class="orderChoice">
+        <button id="fixedBtn" class="secondary selected" onclick="setOrderMode('fixed')">Fixed Order<br><span class="tiny">(Redneck)</span></button>
+        <button id="euroBtn" class="secondary" onclick="setOrderMode('european')">European<br><span class="tiny">Rotate each stand</span></button>
+      </div>
     </div>
 
     <div class="card">
       <div class="row" style="justify-content:space-between">
         <strong>Shooters</strong>
-        <button class="secondary" onclick="addShooter()">+ Add</button>
+        <button class="secondary" onclick="addShooterSetup()">+ Add Shooter</button>
       </div>
       <div id="shooters"></div>
-      <div class="tiny" style="margin-top:8px">Shooter order stays the same at every stand.</div>
+      <div class="tiny" style="margin-top:8px">You can also add shooters after the round starts.</div>
     </div>
 
     <button class="primary" style="width:100%;padding:16px" onclick="startRound()">Start Round</button>
@@ -161,24 +131,25 @@ button, .hitbtn, .missbtn, .actions, .bottom {
 
   <div id="scoring" class="hidden">
     <div class="card hero">
-      <div class="kicker" id="standLabel">Stand 1 of 10</div>
+      <div class="kicker" id="standLabel"></div>
       <div class="tiny" id="roundProgress" style="margin-top:6px"></div>
-      <div class="name" id="shooterName">Chris</div>
-      <div class="progress" id="targetLabel">Target 1 of 10</div>
+      <div class="name" id="shooterName"></div>
+      <div class="progress" id="targetLabel"></div>
       <div class="dots" id="dots"></div>
     </div>
     <div id="wakeStatus">Screen awake while scoring</div>
 
     <div class="card">
       <div class="summary">
-        <div><span class="tiny">Current stand score</span><b id="standScore">0/10</b></div>
+        <div><span class="tiny">Current stand score</span><b id="standScore">0/0</b></div>
       </div>
     </div>
+
     <div class="card">
       <div class="toggleRow">
         <div>
           <strong>Show Overall Score</strong>
-          <div class="tiny">Turn on only when a shooter wants to know where they stand.</div>
+          <div class="tiny">Turn on when a shooter wants to know where they stand.</div>
         </div>
         <label class="switch">
           <input id="overallToggle" type="checkbox" onchange="toggleOverall()">
@@ -186,24 +157,27 @@ button, .hitbtn, .missbtn, .actions, .bottom {
         </label>
       </div>
       <div id="overallBox" class="overallBox hidden">
-        <span class="tiny">Current overall score</span>
+        <span class="tiny"></span>
         <b id="overallScore">0/0</b>
       </div>
     </div>
 
     <div class="card">
-      <strong>Stand totals</strong>
-      <div id="standTotals"></div>
+      <div class="row" style="justify-content:space-between">
+        <strong>Stand totals</strong>
+        <button class="secondary" onclick="openManageRound()">Manage Round</button>
+      </div>
+      <div id="standTotals" style="margin-top:6px"></div>
     </div>
   </div>
 
   <div id="finished" class="hidden">
     <h1>Round Complete</h1>
     <div class="card">
-      <div class="sub" style="margin-bottom:0">Round complete. Final totals are still hidden.</div>
+      <div class="sub" style="margin-bottom:0">Final totals are hidden until you score the card.</div>
     </div>
     <button id="scoreCardBtn" class="primary" style="width:100%;padding:16px" onclick="scoreTheCard()">Score the Card</button>
-
+    <button class="secondary" style="width:100%;padding:16px;margin-top:10px" onclick="continueAnotherStand()">+ Continue With Another Stand</button>
     <div id="finalCard" class="hidden">
       <div class="card">
         <strong>Final Scores</strong>
@@ -223,676 +197,459 @@ button, .hitbtn, .missbtn, .actions, .bottom {
     <div class="actions">
       <button onclick="undo()">↶ Undo</button>
       <button id="completeStandBtn" onclick="completeStandDefinition()">Complete Stand</button>
-      <button onclick="nextShooter()">Shooter →</button>
+      <button onclick="openManageRound()">Manage</button>
     </div>
   </div>
 </div>
 
+<div id="editModal" class="modalBack hidden" onclick="closeEdit(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="editTitle">Edit Score</h2>
+    <div id="editSub" class="sub"></div>
+    <div id="editGrid" class="editgrid"></div>
+    <div class="tiny">Tap a target to cycle: blank → hit → miss → blank.</div>
+    <div class="modalBtns">
+      <button class="secondary" onclick="closeEdit()">Done</button>
+      <button class="danger" onclick="clearEditedShooter()">Clear Score</button>
+    </div>
+  </div>
+</div>
+
+<div id="manageModal" class="modalBack hidden" onclick="closeManageRound(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>Manage Round</h2>
+    <div class="sub">Add a late shooter, adjust planned stands, or enter scores from earlier stands.</div>
+
+    <div class="card" style="box-shadow:none;background:#f5f4f1">
+      <strong>Add Shooter</strong>
+      <div class="row" style="margin-top:8px">
+        <input id="lateShooterName" placeholder="Shooter name">
+        <button class="primary" onclick="addLateShooter()">Add</button>
+      </div>
+      <div class="tiny" style="margin-top:6px">Adding a shooter will not change anyone else's scores.</div>
+    </div>
+
+    <div class="card" style="box-shadow:none;background:#f5f4f1">
+      <strong>Planned Stands</strong>
+      <div class="row" style="margin-top:8px">
+        <button class="secondary" onclick="changeStandCount(-1)">−</button>
+        <input id="manageStandCount" type="number" min="1" max="50" onchange="setManagedStandCount(this.value)">
+        <button class="secondary" onclick="changeStandCount(1)">+</button>
+      </div>
+      <div class="tiny" style="margin-top:6px">The app will still ask before scoring the card when you reach the last planned stand.</div>
+    </div>
+
+    <div class="card" style="box-shadow:none;background:#f5f4f1">
+      <strong>Enter / Edit Earlier Scores</strong>
+      <div id="manageScores"></div>
+    </div>
+
+    <button class="primary" style="width:100%" onclick="closeManageRound()">Done</button>
+  </div>
+</div>
+
+<div id="endStandModal" class="modalBack hidden">
+  <div class="modal">
+    <h2>Ready to Score?</h2>
+    <div class="sub">You've reached the last planned stand. You can score the card now or keep shooting.</div>
+    <button class="primary" style="width:100%;padding:16px" onclick="finishRound()">Score the Card</button>
+    <button class="secondary" style="width:100%;padding:16px;margin-top:10px" onclick="continueAnotherStand()">+ Continue With Another Stand</button>
+  </div>
+</div>
+
 <script>
-let state = {
+const APP_VERSION=15;
+const STORAGE_KEY='clayClipboardStateV2';
+
+let state={
   shooters:[],
   standCount:10,
-  targetsPerStand:10,
   roundTargetTotal:100,
+  orderMode:'fixed',
   standTargets:{},
+  standOrders:{},
+  scores:{},
   stand:0,
-  shooter:0,
-  target:0,
-  scores:{}
+  orderPos:0,
+  target:0
 };
-
-const STORAGE_KEY='clayClipboardStateV1';
 
 function saveState(){
   try{
-    const payload={
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
       state,
-      mode: !document.getElementById('scoring').classList.contains('hidden')
-        ? 'scoring'
+      mode: !document.getElementById('scoring').classList.contains('hidden') ? 'scoring'
         : (!document.getElementById('finished').classList.contains('hidden') ? 'finished' : 'setup'),
-      overallVisible: document.getElementById('overallToggle')?.checked || false
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      overallVisible:document.getElementById('overallToggle')?.checked||false
+    }));
   }catch(e){}
 }
-
 function restoreState(){
   try{
     const raw=localStorage.getItem(STORAGE_KEY);
-    if(!raw) return;
+    if(!raw)return;
     const saved=JSON.parse(raw);
-    if(!saved?.state) return;
+    if(!saved?.state)return;
     state=saved.state;
-
-    document.getElementById('standCount').value=state.standCount || 10;
-    document.getElementById('roundTargetTotal').value=state.roundTargetTotal || 100;
+    if(!state.standTargets)state.standTargets={};
+    if(!state.standOrders)state.standOrders={};
+    if(!state.scores)state.scores={};
+    document.getElementById('standCount').value=state.standCount||10;
+    document.getElementById('roundTargetTotal').value=state.roundTargetTotal||100;
+    setOrderMode(state.orderMode||'fixed',false);
     renderShooters();
-
     if(saved.mode==='scoring'){
       document.getElementById('setup').classList.add('hidden');
-      document.getElementById('finished').classList.add('hidden');
       document.getElementById('scoring').classList.remove('hidden');
       document.getElementById('controls').classList.remove('hidden');
       document.getElementById('overallToggle').checked=!!saved.overallVisible;
-      render();
-      toggleOverall();
-      requestWakeLock();
-    } else if(saved.mode==='finished'){
+      ensureStandOrder(state.stand);
+      render(); toggleOverall(); requestWakeLock();
+    }else if(saved.mode==='finished'){
       document.getElementById('setup').classList.add('hidden');
-      document.getElementById('scoring').classList.add('hidden');
-      document.getElementById('controls').classList.add('hidden');
       document.getElementById('finished').classList.remove('hidden');
     }
   }catch(e){}
 }
+function clearSavedState(){try{localStorage.removeItem(STORAGE_KEY)}catch(e){}}
 
-function clearSavedState(){
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+function setOrderMode(mode,save=true){
+  state.orderMode=mode;
+  document.getElementById('fixedBtn')?.classList.toggle('selected',mode==='fixed');
+  document.getElementById('euroBtn')?.classList.toggle('selected',mode==='european');
+  if(save)saveState();
 }
-
-
 function renderShooters(){
-  const el=document.getElementById('shooters');
-  el.innerHTML='';
-  if(state.shooters.length===0){
-    const empty=document.createElement('div');
-    empty.className='tiny';
-    empty.style.marginTop='10px';
-    empty.textContent='No shooters added yet.';
-    el.appendChild(empty);
-    return;
+  const el=document.getElementById('shooters'); el.innerHTML='';
+  if(!state.shooters.length){
+    el.innerHTML='<div class="tiny" style="margin-top:10px">No shooters added yet.</div>'; return;
   }
   state.shooters.forEach((name,i)=>{
-    const row=document.createElement('div');
-    row.className='shooter-row';
-    row.innerHTML=`
-      <input value="${name}" oninput="state.shooters[${i}]=this.value;saveState()">
-      <button class="secondary" onclick="move(${i},-1)">↑</button>
-      <button class="secondary" onclick="move(${i},1)">↓</button>
-      <button class="danger" onclick="removeShooter(${i})">×</button>`;
+    const row=document.createElement('div'); row.className='shooter-row';
+    row.innerHTML=`<input value="${escapeHtml(name)}" oninput="state.shooters[${i}]=this.value;saveState()">
+      <button class="secondary" onclick="moveShooter(${i},-1)">↑</button>
+      <button class="secondary" onclick="moveShooter(${i},1)">↓</button>
+      <button class="danger" onclick="removeSetupShooter(${i})">×</button>`;
     el.appendChild(row);
   });
 }
-function addShooter(){ state.shooters.push('Shooter '+(state.shooters.length+1)); 
-let editStand=null, editShooter=null;
+function addShooterSetup(){state.shooters.push('');renderShooters();saveState();setTimeout(()=>{const a=document.querySelectorAll('#shooters input');a[a.length-1]?.focus()},0)}
+function removeSetupShooter(i){state.shooters.splice(i,1);renderShooters();saveState()}
+function moveShooter(i,d){const j=i+d;if(j<0||j>=state.shooters.length)return;[state.shooters[i],state.shooters[j]]=[state.shooters[j],state.shooters[i]];renderShooters();saveState()}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
-function openEdit(st,sh){
-  editStand=st; editShooter=sh;
-  document.getElementById('editModal').classList.remove('hidden');
-  renderEdit();
-}
-function closeEdit(e){
-  if(e && e.target && e.target.id!=='editModal') return;
-  document.getElementById('editModal').classList.add('hidden');
-  editStand=null; editShooter=null;
-  render();
-}
-function renderEdit(){
-  const arr=ensure(editStand,editShooter);
-  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
-  const grid=document.getElementById('editGrid'); grid.innerHTML='';
-  arr.forEach((v,i)=>{
-    const b=document.createElement('button');
-    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
-    b.textContent=v===1?'✓':v===0?'×':(i+1);
-    b.onclick=()=>cycleEditTarget(i);
-    grid.appendChild(b);
-  });
-}
-function cycleEditTarget(i){
-  const arr=ensure(editStand,editShooter);
-  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
-  renderEdit();
-  saveState();
-}
-function clearEditedShooter(){
-  const arr=ensure(editStand,editShooter);
-  for(let i=0;i<arr.length;i++) arr[i]=null;
-  renderEdit();
-  saveState();
-}
-
-renderShooters();
- }
-function removeShooter(i){ if(state.shooters.length>1){state.shooters.splice(i,1);
-let editStand=null, editShooter=null;
-
-function openEdit(st,sh){
-  editStand=st; editShooter=sh;
-  document.getElementById('editModal').classList.remove('hidden');
-  renderEdit();
-}
-function closeEdit(e){
-  if(e && e.target && e.target.id!=='editModal') return;
-  document.getElementById('editModal').classList.add('hidden');
-  editStand=null; editShooter=null;
-  render();
-}
-function renderEdit(){
-  const arr=ensure(editStand,editShooter);
-  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
-  const grid=document.getElementById('editGrid'); grid.innerHTML='';
-  arr.forEach((v,i)=>{
-    const b=document.createElement('button');
-    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
-    b.textContent=v===1?'✓':v===0?'×':(i+1);
-    b.onclick=()=>cycleEditTarget(i);
-    grid.appendChild(b);
-  });
-}
-function cycleEditTarget(i){
-  const arr=ensure(editStand,editShooter);
-  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
-  renderEdit();
-  saveState();
-}
-function clearEditedShooter(){
-  const arr=ensure(editStand,editShooter);
-  for(let i=0;i<arr.length;i++) arr[i]=null;
-  renderEdit();
-  saveState();
-}
-
-renderShooters();
-} }
-function move(i,d){const j=i+d;if(j<0||j>=state.shooters.length)return;[state.shooters[i],state.shooters[j]]=[state.shooters[j],state.shooters[i]];
-let editStand=null, editShooter=null;
-
-function openEdit(st,sh){
-  editStand=st; editShooter=sh;
-  document.getElementById('editModal').classList.remove('hidden');
-  renderEdit();
-}
-function closeEdit(e){
-  if(e && e.target && e.target.id!=='editModal') return;
-  document.getElementById('editModal').classList.add('hidden');
-  editStand=null; editShooter=null;
-  render();
-}
-function renderEdit(){
-  const arr=ensure(editStand,editShooter);
-  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
-  const grid=document.getElementById('editGrid'); grid.innerHTML='';
-  arr.forEach((v,i)=>{
-    const b=document.createElement('button');
-    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
-    b.textContent=v===1?'✓':v===0?'×':(i+1);
-    b.onclick=()=>cycleEditTarget(i);
-    grid.appendChild(b);
-  });
-}
-function cycleEditTarget(i){
-  const arr=ensure(editStand,editShooter);
-  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
-  renderEdit();
-  saveState();
-}
-function clearEditedShooter(){
-  const arr=ensure(editStand,editShooter);
-  for(let i=0;i<arr.length;i++) arr[i]=null;
-  renderEdit();
-  saveState();
-}
-
-renderShooters();
-}
-function key(st,sh){return `${st}_${sh}`;}
-function ensure(st,sh){
-  const k=key(st,sh);
-  const known=state.standTargets?.[st] || null;
-  const len=known || 1;
-  if(!state.scores[k]) state.scores[k]=Array(len).fill(null);
-  if(known && state.scores[k].length!==known){
+function key(st,sh){return `${st}_${sh}`}
+function standTargetCount(st){return state.standTargets?.[st]||null}
+function ensureScore(st,sh){
+  const k=key(st,sh), known=standTargetCount(st), len=known||1;
+  if(!state.scores[k])state.scores[k]=Array(len).fill(null);
+  if(known&&state.scores[k].length!==known){
     const old=state.scores[k];
-    state.scores[k]=Array.from({length:known},(_,i)=>old[i] ?? null);
+    state.scores[k]=Array.from({length:known},(_,i)=>old[i]??null);
   }
   return state.scores[k];
 }
+function enteredCount(st,sh){return ensureScore(st,sh).filter(v=>v!==null).length}
+function hitsCount(st,sh){return ensureScore(st,sh).filter(v=>v===1).length}
+
+function makeStandOrder(st){
+  const n=state.shooters.length;
+  if(!n)return [];
+  if(state.orderMode==='fixed')return Array.from({length:n},(_,i)=>i);
+  const lead=st%n;
+  return Array.from({length:n},(_,i)=>(lead+i)%n);
+}
+function ensureStandOrder(st){
+  if(!state.standOrders[st])state.standOrders[st]=makeStandOrder(st);
+  return state.standOrders[st];
+}
+function activeShooterIndex(){
+  const order=ensureStandOrder(state.stand);
+  return order[state.orderPos]??0;
+}
+
 function startRound(){
-  state.shooters=state.shooters.map(s=>s.trim()).filter(Boolean);
-  if(state.shooters.length===0){
-    alert('Add at least one shooter before starting the round.');
-    renderShooters();
-    return;
-  }
+  state.shooters=state.shooters.map(x=>x.trim()).filter(Boolean);
+  if(!state.shooters.length){alert('Add at least one shooter before starting the round.');renderShooters();return}
   state.standCount=parseInt(document.getElementById('standCount').value)||10;
   state.roundTargetTotal=parseInt(document.getElementById('roundTargetTotal').value)||100;
-  state.stand=0; state.shooter=0; state.target=0;
-  state.scores={}; state.standTargets={};
+  state.standTargets={};state.standOrders={};state.scores={};state.stand=0;state.orderPos=0;state.target=0;
+  ensureStandOrder(0);
   document.getElementById('setup').classList.add('hidden');
   document.getElementById('scoring').classList.remove('hidden');
   document.getElementById('controls').classList.remove('hidden');
-  render();
-  saveState();
-  requestWakeLock();
+  render();saveState();requestWakeLock();
 }
-
-function currentStandTargetCount(){
-  return state.standTargets?.[state.stand] || null;
-}
-
-function actualEnteredCount(st,sh){
-  return ensure(st,sh).filter(v=>v!==null).length;
-}
-
 function setStandTargetCount(st,count){
-  if(!state.standTargets) state.standTargets={};
   state.standTargets[st]=count;
   state.shooters.forEach((_,sh)=>{
-    const k=key(st,sh);
-    const old=state.scores[k] || [];
-    state.scores[k]=Array.from({length:count},(_,i)=>old[i] ?? null);
+    const old=state.scores[key(st,sh)]||[];
+    state.scores[key(st,sh)]=Array.from({length:count},(_,i)=>old[i]??null);
   });
 }
-
 function completeStandDefinition(){
-  if(state.shooter!==0 || currentStandTargetCount()) return;
-  const entered=actualEnteredCount(state.stand,0);
-  if(entered===0){
-    alert('Enter at least one target before completing the stand.');
-    return;
-  }
-  setStandTargetCount(state.stand, entered);
-  if(state.shooters.length>1){
-    state.shooter=1;
-    state.target=firstOpen(state.stand,1);
-    render(); saveState();
-  } else {
-    advanceToNextStandOrFinish();
-  }
+  const order=ensureStandOrder(state.stand);
+  if(state.orderPos!==0||standTargetCount(state.stand))return;
+  const sh=order[0], entered=enteredCount(state.stand,sh);
+  if(!entered){alert('Enter at least one target before completing the stand.');return}
+  setStandTargetCount(state.stand,entered);
+  if(order.length>1){state.orderPos=1;state.target=firstOpen(state.stand,order[1]);render();saveState()}
+  else finishCurrentStand();
 }
-
-function advanceToNextStandOrFinish(){
-  if(state.stand < state.standCount-1){
-    state.stand++;
-    state.shooter=0;
-    state.target=0;
-    ensure(state.stand,0);
-    render(); saveState();
-  } else {
-    finish();
-  }
-}
-
 function score(v){
-  let arr=ensure(state.stand,state.shooter);
-  const known=currentStandTargetCount();
-
-  if(state.shooter===0 && !known){
+  const sh=activeShooterIndex(), known=standTargetCount(state.stand);
+  let arr=ensureScore(state.stand,sh);
+  if(state.orderPos===0&&!known){
     const blank=arr.findIndex(x=>x===null);
-    if(blank!==-1) arr[blank]=v;
-    else arr.push(v);
-    arr.push(null);
-    state.target=arr.length-1;
-    saveState();
-    render();
-    return;
+    if(blank!==-1)arr[blank]=v;else arr.push(v);
+    arr.push(null);state.target=arr.length-1;render();saveState();return;
   }
-
-  arr[state.target]=v;
-  saveState();
-  advance();
+  arr[state.target]=v;saveState();advance();
 }
 function advance(){
-  const arr=ensure(state.stand,state.shooter);
-  let next=arr.findIndex((v,i)=>i>state.target && v===null);
-  if(next!==-1){
-    state.target=next;
-    render();
+  const sh=activeShooterIndex(), arr=ensureScore(state.stand,sh);
+  const next=arr.findIndex((v,i)=>i>state.target&&v===null);
+  if(next!==-1){state.target=next;render();return}
+  const expected=standTargetCount(state.stand);
+  if(expected&&enteredCount(state.stand,sh)>=expected){
+    const order=ensureStandOrder(state.stand);
+    if(state.orderPos<order.length-1){
+      state.orderPos++;state.target=firstOpen(state.stand,activeShooterIndex());render();saveState();
+    }else finishCurrentStand();
+  }
+}
+function firstOpen(st,sh){const a=ensureScore(st,sh),i=a.findIndex(v=>v===null);return i===-1?Math.max(0,a.length-1):i}
+function finishCurrentStand(){
+  if(state.stand>=state.standCount-1){
+    saveState();
+    document.getElementById('endStandModal').classList.remove('hidden');
     return;
   }
-
-  const expected=currentStandTargetCount();
-  if(expected && actualEnteredCount(state.stand,state.shooter)>=expected){
-    if(state.shooter < state.shooters.length-1){
-      state.shooter++;
-      state.target=firstOpen(state.stand,state.shooter);
-      render(); saveState();
-      return;
-    }
-    advanceToNextStandOrFinish();
-  }
+  state.stand++;state.orderPos=0;state.target=0;ensureStandOrder(state.stand);render();saveState();
 }
-function firstOpen(st,sh){
-  const arr=ensure(st,sh);
-  const i=arr.findIndex(v=>v===null);
-  return i===-1 ? Math.max(0,arr.length-1) : i;
+function continueAnotherStand(){
+  document.getElementById('endStandModal').classList.add('hidden');
+  document.getElementById('finished').classList.add('hidden');
+  document.getElementById('scoring').classList.remove('hidden');
+  document.getElementById('controls').classList.remove('hidden');
+  state.standCount=Math.max(state.standCount,state.stand+1)+1;
+  state.stand++;state.orderPos=0;state.target=0;ensureStandOrder(state.stand);render();saveState();requestWakeLock();
 }
-function undo(){
-  const arr=ensure(state.stand,state.shooter);
-  for(let i=state.target;i>=0;i--){
-    if(arr[i]!==null){arr[i]=null;state.target=i;render();return;}
-  }
-  if(state.shooter>0){
-    state.shooter--;
-    const a=ensure(state.stand,state.shooter);
-    for(let i=a.length-1;i>=0;i--) if(a[i]!==null){a[i]=null;state.target=i;render();return;}
-  } else if(state.stand>0){
-    state.stand--; state.shooter=state.shooters.length-1;
-    const a=ensure(state.stand,state.shooter);
-    for(let i=a.length-1;i>=0;i--) if(a[i]!==null){a[i]=null;state.target=i;render();return;}
-  }
-}
-function prevShooter(){
-  if(state.shooter>0){state.shooter--;state.target=firstOpen(state.stand,state.shooter);render();saveState();}
-}
-function nextShooter(){
-  if(state.shooter<state.shooters.length-1){state.shooter++;state.target=firstOpen(state.stand,state.shooter);render();saveState();}
-}
-
-function toggleOverall(){
-  const toggle=document.getElementById('overallToggle');
-  const box=document.getElementById('overallBox');
-  if(!toggle || !box) return;
-
-  const on=toggle.checked;
-  box.classList.toggle('hidden', !on);
-
-  if(on) updateOverallDisplay();
-  saveState();
-}
-
-function updateOverallDisplay(){
-  const el=document.getElementById('overallScore');
-  if(!el) return;
-
-  let hits=0;
-  let entered=0;
-
-  for(let st=0; st<state.standCount; st++){
-    const arr=ensure(st,state.shooter);
-    arr.forEach(v=>{
-      if(v!==null) entered++;
-      if(v===1) hits++;
-    });
-  }
-
-  el.textContent=`${hits}/${entered}`;
-
-  const label=document.querySelector('#overallBox .tiny');
-  if(label){
-    label.textContent=`${state.shooters[state.shooter]}'s current overall score`;
-  }
-}
-
-function shooterRoundTotal(sh){
-  let hits=0;
-  for(let st=0;st<state.standCount;st++) hits+=ensure(st,sh).filter(v=>v===1).length;
-  return hits;
-}
-
-function roundTargetsCompleted(){
-  let total=0;
-  for(let st=0;st<state.standCount;st++) total += state.standTargets?.[st] || 0;
-  return total;
-}
-function render(){
-  const arr=ensure(state.stand,state.shooter);
-  document.getElementById('standLabel').textContent=`Stand ${state.stand+1} of ${state.standCount}`;
-  const defined=roundTargetsCompleted();
-  const rp=document.getElementById('roundProgress');
-  if(rp) rp.textContent=`Round progress: ${defined}/${state.roundTargetTotal} targets defined`;
-  document.getElementById('shooterName').textContent=state.shooters[state.shooter];
-  const known=currentStandTargetCount();
-  if(state.shooter===0 && !known){
-    const entered=actualEnteredCount(state.stand,state.shooter);
-    document.getElementById('targetLabel').textContent=`${entered} target${entered===1?'':'s'} entered`;
-  } else {
-    document.getElementById('targetLabel').textContent=`Target ${Math.min(state.target+1,known || 1)} of ${known || 1}`;
-  }
-  const completeBtn=document.getElementById('completeStandBtn');
-  if(completeBtn) completeBtn.style.display=(state.shooter===0 && !known)?'block':'none';
-  const overallLabel=document.querySelector('#overallBox .tiny');
-  if(overallLabel) overallLabel.textContent=`${state.shooters[state.shooter]}'s current overall score`;
-
-  const dots=document.getElementById('dots'); dots.innerHTML='';
-  arr.forEach((v,i)=>{
-    if(state.shooter===0 && !known && v===null) return;
-    const d=document.createElement('div');
-    d.className='dot'+(v===1?' hit':v===0?' miss':'')+(i===state.target?' current':'');
-    d.textContent=v===1?'✓':v===0?'×':(i+1);
-    dots.appendChild(d);
-  });
-
-  const standDenom=known || actualEnteredCount(state.stand,state.shooter);
-  document.getElementById('standScore').textContent=`${arr.filter(v=>v===1).length}/${standDenom || 0}`;
-  if(document.getElementById('overallToggle')?.checked) updateOverallDisplay();
-
-  const totals=document.getElementById('standTotals'); totals.innerHTML='';
-  state.shooters.forEach((s,sh)=>{
-    const a=ensure(state.stand,sh);
-    const done=a.filter(v=>v!==null).length;
-    const hits=a.filter(v=>v===1).length;
-    const line=document.createElement('div');line.className='scoreline';
-    const denom=state.standTargets?.[state.stand] || done;
-    line.innerHTML=`<span>${s}</span>
-      <span style="display:flex;align-items:center;gap:8px">
-        <strong>${hits}/${denom || 0} <span class="tiny">${(state.standTargets?.[state.stand] && done===denom)?'done':done+' entered'}</span></strong>
-        <button class="secondary" style="padding:7px 10px" onclick="openEdit(${state.stand},${sh})">Edit</button>
-      </span>`;
-    totals.appendChild(line);
-  });
-}
-function finish(){
+function finishRound(){
+  document.getElementById('endStandModal').classList.add('hidden');
   document.getElementById('scoring').classList.add('hidden');
   document.getElementById('controls').classList.add('hidden');
   document.getElementById('finished').classList.remove('hidden');
   document.getElementById('finalCard').classList.add('hidden');
   document.getElementById('scoreCardBtn').classList.remove('hidden');
+  releaseWakeLock();saveState();
+}
+function undo(){
+  const sh=activeShooterIndex(),a=ensureScore(state.stand,sh);
+  for(let i=a.length-1;i>=0;i--){
+    if(a[i]!==null){a[i]=null;state.target=i;render();saveState();return}
+  }
+}
+function roundDefinedTargets(){return Object.values(state.standTargets).reduce((a,b)=>a+(Number(b)||0),0)}
+function shooterOverall(sh){
+  let hits=0,entered=0;
+  for(let st=0;st<state.standCount;st++){
+    const a=ensureScore(st,sh);
+    a.forEach(v=>{if(v!==null)entered++;if(v===1)hits++});
+  }
+  return {hits,entered};
+}
+function toggleOverall(){
+  const on=document.getElementById('overallToggle').checked;
+  document.getElementById('overallBox').classList.toggle('hidden',!on);
+  if(on)updateOverallDisplay();
+  saveState();
+}
+function updateOverallDisplay(){
+  const sh=activeShooterIndex(),t=shooterOverall(sh);
+  document.getElementById('overallScore').textContent=`${t.hits}/${t.entered}`;
+  document.querySelector('#overallBox .tiny').textContent=`${state.shooters[sh]}'s current overall score`;
 }
 
+function render(){
+  ensureStandOrder(state.stand);
+  const sh=activeShooterIndex(), known=standTargetCount(state.stand), arr=ensureScore(state.stand,sh);
+  document.getElementById('standLabel').textContent=`Stand ${state.stand+1} of ${state.standCount}`;
+  document.getElementById('roundProgress').textContent=`Course: ${roundDefinedTargets()}/${state.roundTargetTotal} targets defined`;
+  document.getElementById('shooterName').textContent=state.shooters[sh]||'';
+  if(state.orderPos===0&&!known){
+    const n=enteredCount(state.stand,sh);
+    document.getElementById('targetLabel').textContent=`${n} target${n===1?'':'s'} entered`;
+  }else{
+    document.getElementById('targetLabel').textContent=`Target ${Math.min(state.target+1,known||1)} of ${known||1}`;
+  }
+  document.getElementById('completeStandBtn').style.display=(state.orderPos===0&&!known)?'block':'none';
+
+  const dots=document.getElementById('dots');dots.innerHTML='';
+  arr.forEach((v,i)=>{
+    if(state.orderPos===0&&!known&&v===null)return;
+    const d=document.createElement('div');
+    d.className='dot'+(v===1?' hit':v===0?' miss':'')+(i===state.target?' current':'');
+    d.textContent=v===1?'✓':v===0?'×':(i+1);dots.appendChild(d);
+  });
+  const denom=known||enteredCount(state.stand,sh);
+  document.getElementById('standScore').textContent=`${hitsCount(state.stand,sh)}/${denom||0}`;
+  if(document.getElementById('overallToggle')?.checked)updateOverallDisplay();
+
+  const totals=document.getElementById('standTotals');totals.innerHTML='';
+  ensureStandOrder(state.stand).forEach(idx=>{
+    const done=enteredCount(state.stand,idx),hits=hitsCount(state.stand,idx),den=known||done;
+    const line=document.createElement('div');line.className='scoreline';
+    line.innerHTML=`<span>${escapeHtml(state.shooters[idx])}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <strong>${hits}/${den||0} <span class="tiny">${known&&done===known?'done':done+' entered'}</span></strong>
+        <button class="secondary" style="padding:7px 10px" onclick="openEdit(${state.stand},${idx})">Edit</button>
+      </span>`;
+    totals.appendChild(line);
+  });
+}
+
+let editStand=null,editShooter=null;
+function openEdit(st,sh){
+  editStand=st;editShooter=sh;
+  const known=standTargetCount(st);
+  if(!known){alert('Complete this stand first so the target count is known.');return}
+  ensureScore(st,sh);
+  document.getElementById('editModal').classList.remove('hidden');renderEdit();
+}
+function closeEdit(e){
+  if(e&&e.target?.id!=='editModal')return;
+  document.getElementById('editModal').classList.add('hidden');
+  editStand=null;editShooter=null;render();saveState();
+}
+function renderEdit(){
+  const arr=ensureScore(editStand,editShooter),known=standTargetCount(editStand);
+  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
+  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${known} targets`;
+  const g=document.getElementById('editGrid');g.innerHTML='';
+  arr.forEach((v,i)=>{
+    const b=document.createElement('button');b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
+    b.textContent=v===1?'✓':v===0?'×':(i+1);
+    b.onclick=()=>{arr[i]=arr[i]===null?1:(arr[i]===1?0:null);renderEdit();saveState()};
+    g.appendChild(b);
+  });
+}
+function clearEditedShooter(){const a=ensureScore(editStand,editShooter);for(let i=0;i<a.length;i++)a[i]=null;renderEdit();saveState()}
+
+function openManageRound(){
+  document.getElementById('manageStandCount').value=state.standCount;
+  document.getElementById('lateShooterName').value='';
+  document.getElementById('manageModal').classList.remove('hidden');renderManageScores();
+}
+function closeManageRound(e){
+  if(e&&e.target?.id!=='manageModal')return;
+  document.getElementById('manageModal').classList.add('hidden');render();saveState();
+}
+function addLateShooter(){
+  const input=document.getElementById('lateShooterName'),name=input.value.trim();
+  if(!name)return;
+  const newIdx=state.shooters.length;state.shooters.push(name);
+
+  // Existing stand orders are preserved; append the late shooter to the current stand.
+  Object.keys(state.standOrders).forEach(k=>{
+    const st=Number(k);
+    if(st===state.stand&&!state.standOrders[st].includes(newIdx))state.standOrders[st].push(newIdx);
+  });
+  // Future stands will be generated with the expanded roster.
+  for(let st=0;st<state.standCount;st++){
+    if(standTargetCount(st))ensureScore(st,newIdx);
+  }
+  input.value='';saveState();renderManageScores();render();
+}
+function changeStandCount(delta){setManagedStandCount(state.standCount+delta)}
+function setManagedStandCount(v){
+  const n=Math.max(state.stand+1,Math.min(50,parseInt(v)||state.standCount));
+  state.standCount=n;document.getElementById('manageStandCount').value=n;saveState();render();
+}
+function renderManageScores(){
+  const box=document.getElementById('manageScores');box.innerHTML='';
+  state.shooters.forEach((name,sh)=>{
+    const section=document.createElement('div');section.style.marginTop='14px';
+    const title=document.createElement('strong');title.textContent=name;section.appendChild(title);
+    const grid=document.createElement('div');grid.className='standGrid';
+    for(let st=0;st<=state.stand;st++){
+      const known=standTargetCount(st);
+      if(!known)continue;
+      const t=shooterOverallForStand(st,sh);
+      const b=document.createElement('button');
+      b.className='standBtn'+(t.entered===known?' done':'');
+      b.innerHTML=`Stand ${st+1}<br><span class="tiny">${t.entered?`${t.hits}/${t.entered}`:`—/${known}`}</span>`;
+      b.onclick=()=>{document.getElementById('manageModal').classList.add('hidden');openEdit(st,sh)};
+      grid.appendChild(b);
+    }
+    section.appendChild(grid);box.appendChild(section);
+  });
+}
+function shooterOverallForStand(st,sh){return{hits:hitsCount(st,sh),entered:enteredCount(st,sh)}}
+
 function scoreTheCard(){
-  const f=document.getElementById('finalScores');
-  f.innerHTML='';
+  const f=document.getElementById('finalScores');f.innerHTML='';
   state.shooters.forEach((s,sh)=>{
-    const line=document.createElement('div');
-    line.className='scoreline';
-    line.innerHTML=`<span><strong>${s}</strong></span><strong>${shooterRoundTotal(sh)}/${state.standCount*state.targetsPerStand}</strong>`;
+    const t=shooterOverall(sh),line=document.createElement('div');line.className='scoreline';
+    line.innerHTML=`<span><strong>${escapeHtml(s)}</strong></span><strong>${t.hits}/${t.entered}</strong>`;
     f.appendChild(line);
   });
   document.getElementById('scoreCardBtn').classList.add('hidden');
   document.getElementById('finalCard').classList.remove('hidden');
 }
+function newRound(){releaseWakeLock();clearSavedState();location.reload()}
 
-function newRound(){
-  releaseWakeLock();
-  clearSavedState();
-  location.reload();
-}
-
-
-let editStand=null, editShooter=null;
-
-function openEdit(st,sh){
-  editStand=st; editShooter=sh;
-  document.getElementById('editModal').classList.remove('hidden');
-  renderEdit();
-}
-function closeEdit(e){
-  if(e && e.target && e.target.id!=='editModal') return;
-  document.getElementById('editModal').classList.add('hidden');
-  editStand=null; editShooter=null;
-  render();
-}
-function renderEdit(){
-  const arr=ensure(editStand,editShooter);
-  document.getElementById('editTitle').textContent=`${state.shooters[editShooter]} — Stand ${editStand+1}`;
-  document.getElementById('editSub').textContent=`${arr.filter(v=>v===1).length} hits out of ${state.standTargets?.[editStand] || arr.filter(v=>v!==null).length} targets`;
-  const grid=document.getElementById('editGrid'); grid.innerHTML='';
-  arr.forEach((v,i)=>{
-    const b=document.createElement('button');
-    b.className='editTarget'+(v===1?' hit':v===0?' miss':'');
-    b.textContent=v===1?'✓':v===0?'×':(i+1);
-    b.onclick=()=>cycleEditTarget(i);
-    grid.appendChild(b);
-  });
-}
-function cycleEditTarget(i){
-  const arr=ensure(editStand,editShooter);
-  arr[i]=arr[i]===null?1:(arr[i]===1?0:null);
-  renderEdit();
-  saveState();
-}
-function clearEditedShooter(){
-  const arr=ensure(editStand,editShooter);
-  for(let i=0;i<arr.length;i++) arr[i]=null;
-  renderEdit();
-  saveState();
-}
-
-renderShooters();
-
-
+// Wake lock
 let wakeLock=null;
-
 async function requestWakeLock(){
-  if(!('wakeLock' in navigator)) return;
+  if(!('wakeLock'in navigator))return;
   try{
     wakeLock=await navigator.wakeLock.request('screen');
-    const status=document.getElementById('wakeStatus');
-    if(status){
-      status.textContent='Screen will stay awake while scoring';
-      status.classList.add('on');
-    }
-    wakeLock.addEventListener('release', ()=>{
-      const s=document.getElementById('wakeStatus');
-      if(s){
-        s.textContent='Screen wake lock paused';
-        s.classList.remove('on');
-      }
-    });
+    const s=document.getElementById('wakeStatus');if(s){s.textContent='Screen will stay awake while scoring';s.classList.add('on')}
   }catch(e){}
 }
+async function releaseWakeLock(){try{if(wakeLock){await wakeLock.release();wakeLock=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!document.getElementById('scoring').classList.contains('hidden'))requestWakeLock()});
 
-async function releaseWakeLock(){
-  try{
-    if(wakeLock){
-      await wakeLock.release();
-      wakeLock=null;
-    }
-  }catch(e){}
-}
+// Prevent accidental rapid-tap zoom on scoring controls.
+document.addEventListener('dblclick',e=>{if(e.target.closest('#controls,.hitbtn,.missbtn,.actions button'))e.preventDefault()},{passive:false});
 
-function scoringIsActive(){
-  const scoring=document.getElementById('scoring');
-  return scoring && !scoring.classList.contains('hidden');
-}
-
-// iOS may release the wake lock when the app loses focus.
-// Re-request it when the app becomes visible again during a round.
-document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState==='visible' && scoringIsActive()){
-    requestWakeLock();
-  }
-});
-
-
-const APP_VERSION=14;
-let availableVersion=null;
-let swRegistration=null;
-let refreshing=false;
-
-function showUpdateBanner(version){
-  availableVersion=version || null;
-  const banner=document.getElementById('updateBanner');
-  if(banner) banner.classList.remove('hidden');
-}
-
+// Reliable updater
+let availableVersion=null,swRegistration=null,refreshing=false;
+function showUpdateBanner(v){availableVersion=v||null;document.getElementById('updateBanner').classList.remove('hidden')}
 async function checkForAppUpdate(){
-  if(!navigator.onLine) return;
+  if(!navigator.onLine)return;
   try{
-    // Cache-busting query plus no-store makes this independent of normal app caching.
-    const response=await fetch('./version.json?ts='+Date.now(), {
-      cache:'no-store',
-      headers:{'Cache-Control':'no-cache'}
-    });
-    if(!response.ok) return;
-    const remote=await response.json();
-    const remoteVersion=Number(remote.version || 0);
-    if(remoteVersion > APP_VERSION){
-      showUpdateBanner(remoteVersion);
-    }
+    const r=await fetch('./version.json?ts='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+    if(!r.ok)return;const remote=await r.json();if(Number(remote.version||0)>APP_VERSION)showUpdateBanner(Number(remote.version));
   }catch(e){}
 }
-
 async function applyUpdate(){
   try{
-    saveState();
-
-    // Force the browser to fetch the current service worker and app shell.
-    if(swRegistration){
-      await swRegistration.update().catch(()=>{});
-    }
-
-    // Remove old cached app files. Local score data is stored separately
-    // in localStorage and is intentionally left untouched.
-    const keys=await caches.keys();
-    await Promise.all(keys.map(key=>caches.delete(key)));
-
-    if(swRegistration?.waiting){
-      swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
-      return;
-    }
-
-    // A cache-busted reload forces the current GitHub Pages files.
-    location.replace('./?updated='+(availableVersion || Date.now()));
-  }catch(e){
-    location.reload();
-  }
+    saveState();if(swRegistration)await swRegistration.update().catch(()=>{});
+    const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)));
+    if(swRegistration?.waiting){swRegistration.waiting.postMessage({type:'SKIP_WAITING'});return}
+    location.replace('./?updated='+(availableVersion||Date.now()));
+  }catch(e){location.reload()}
 }
-
-if('serviceWorker' in navigator){
-  window.addEventListener('load', async ()=>{
+if('serviceWorker'in navigator){
+  window.addEventListener('load',async()=>{
     try{
       swRegistration=await navigator.serviceWorker.register('./service-worker.js');
-
-      if(swRegistration.waiting){
-        swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
-      }
-
-      swRegistration.addEventListener('updatefound', ()=>{
-        const worker=swRegistration.installing;
-        if(!worker) return;
-        worker.addEventListener('statechange', ()=>{
-          if(worker.state==='installed' && navigator.serviceWorker.controller){
-            showUpdateBanner(availableVersion);
-          }
-        });
+      if(swRegistration.waiting)swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
+      swRegistration.addEventListener('updatefound',()=>{
+        const w=swRegistration.installing;if(!w)return;
+        w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdateBanner(availableVersion)});
       });
-
-      navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-        if(refreshing) return;
-        refreshing=true;
-        location.replace('./?updated='+(availableVersion || Date.now()));
-      });
-
-      await checkForAppUpdate();
-      window.addEventListener('online', checkForAppUpdate);
-
-      // Also check when the app returns to the foreground.
-      document.addEventListener('visibilitychange', ()=>{
-        if(document.visibilityState==='visible') checkForAppUpdate();
-      });
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;location.replace('./?updated='+(availableVersion||Date.now()))});
+      await checkForAppUpdate();window.addEventListener('online',checkForAppUpdate);
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForAppUpdate()});
     }catch(e){}
   });
 }
+
+renderShooters();
+restoreState();
 </script>
-
-<div id="editModal" class="modalBack hidden" onclick="closeEdit(event)">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2 id="editTitle">Edit Score</h2>
-    <div id="editSub" class="subline"></div>
-    <div id="editGrid" class="editgrid"></div>
-    <div class="tiny">Tap a target to cycle: blank → hit → miss → blank.</div>
-    <div class="modalBtns">
-      <button class="secondary" onclick="closeEdit()">Done</button>
-      <button class="danger" onclick="clearEditedShooter()">Clear Shooter</button>
-    </div>
-  </div>
-</div>
 </body>
-
 </html>
