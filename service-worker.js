@@ -1,4 +1,4 @@
-const CACHE='clay-clipboard-v15';
+const CACHE='clay-clipboard-v16';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
@@ -15,7 +15,7 @@ self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
   if(url.pathname.endsWith('/version.json')){
-    event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>new Response(JSON.stringify({version:15}),{headers:{'Content-Type':'application/json'}})));
+    event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>new Response(JSON.stringify({version:16}),{headers:{'Content-Type':'application/json'}})));
     return;
   }
   const shell=url.pathname.endsWith('/')||url.pathname.endsWith('/index.html')||url.pathname.endsWith('/manifest.webmanifest');

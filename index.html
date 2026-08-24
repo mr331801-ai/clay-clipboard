@@ -93,7 +93,7 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
   <div id="setup">
     <h1>Clay Clipboard</h1>
     <div class="sub">Simple sporting clays scorekeeping.</div>
-    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 15</div>
+    <div class="tiny" style="margin-top:-6px;margin-bottom:10px">Version 16</div>
 
     <div class="card">
       <div class="setup-grid">
@@ -165,7 +165,10 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
     <div class="card">
       <div class="row" style="justify-content:space-between">
         <strong>Stand totals</strong>
-        <button class="secondary" onclick="openManageRound()">Manage Round</button>
+        <div class="row">
+          <button class="secondary" onclick="openViewScores()">View Scores</button>
+          <button class="secondary" onclick="openManageRound()">Manage Round</button>
+        </div>
       </div>
       <div id="standTotals" style="margin-top:6px"></div>
     </div>
@@ -248,6 +251,16 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
   </div>
 </div>
 
+
+<div id="viewScoresModal" class="modalBack hidden" onclick="closeViewScores(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>View Shooters' Scores</h2>
+    <div class="sub">Current overall scores based only on targets entered so far.</div>
+    <div id="viewScoresList"></div>
+    <button class="primary" style="width:100%;margin-top:12px" onclick="closeViewScores()">Done</button>
+  </div>
+</div>
+
 <div id="endStandModal" class="modalBack hidden">
   <div class="modal">
     <h2>Ready to Score?</h2>
@@ -258,7 +271,7 @@ label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 </div>
 
 <script>
-const APP_VERSION=15;
+const APP_VERSION=16;
 const STORAGE_KEY='clayClipboardStateV2';
 
 let state={
@@ -586,6 +599,24 @@ function renderManageScores(){
   });
 }
 function shooterOverallForStand(st,sh){return{hits:hitsCount(st,sh),entered:enteredCount(st,sh)}}
+
+
+function openViewScores(){
+  const box=document.getElementById('viewScoresList');
+  box.innerHTML='';
+  state.shooters.forEach((name,sh)=>{
+    const t=shooterOverall(sh);
+    const line=document.createElement('div');
+    line.className='scoreline';
+    line.innerHTML=`<span><strong>${escapeHtml(name)}</strong></span><strong>${t.hits}/${t.entered}</strong>`;
+    box.appendChild(line);
+  });
+  document.getElementById('viewScoresModal').classList.remove('hidden');
+}
+function closeViewScores(e){
+  if(e&&e.target?.id!=='viewScoresModal')return;
+  document.getElementById('viewScoresModal').classList.add('hidden');
+}
 
 function scoreTheCard(){
   const f=document.getElementById('finalScores');f.innerHTML='';
